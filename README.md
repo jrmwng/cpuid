@@ -1,5 +1,9 @@
 # cpuid
-CPUID in C++ class, supporting output and input of cpuid data in human friendly text format
+CPUID in C++ template, supporting output and input of cpuid data in human friendly text format
+
+## The header file
+
+[cpuid.h](https://github.com/jrmwng/cpuid/blob/master/cpuid.h)
 
 ## Sample output
 
