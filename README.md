@@ -96,3 +96,29 @@ CPUID in C++ template, supporting output and input of cpuid data in human friend
       	std::cout << "FPU is available" << std::endl;
       if (CPUID.uMMX)
       	std::cout << "MMX is available" << std::endl;
+      	
+      if (CPUID.uSSE && CPUID.uSSE2 && CPUID.uSSE3 && CPUID.uSSSE3 && CPUID.uSSE4_1 && CPUID.uSSE4_2)
+      	std::cout << "SSE is available (all)" << std::endl;
+      else if (CPUID.uSSE || CPUID.uSSE2 || CPUID.uSSE3 || CPUID.uSSSE3 || CPUID.uSSE4_1 || CPUID.uSSE4_2)
+      	std::cout << "SSE is available (some)" << std::endl;
+      	
+      if (CPUID.uAVX && CPUID.uAVX2)
+      	std::cout << "AVX is available (all)" << std::endl;
+      else if (CPUID.uAVX || CPUID.uAVX2)
+      	std::cout << "AVX is available (some)" << std::endl;
+      	
+      if (CPUID.uBMI1 && CPUID.uBMI2)
+      	std::cout << "BMI is available (all)" << std::endl;
+      else if (CPUID.uBMI1 || CPUID.uBMI2)
+      	std::cout << "BMI is available (some)" << std::endl;
+      	
+      if (CPUID.uHLE && CPUID.uRTM)
+      	std::cout << "Intel TSX is available (all)" << std::endl;
+      else if (CPUID.uHLE || CPUID.uRTM)
+      	std::cout << "Intel TSX is available (some)" << std::endl;
+      
+      if (CPUID.uIntelMPX)
+      	std::cout << "Intel MPX is available" << std::endl;
+      
+      if (CPUID.uIntelSGX)
+      	std::cout << "Intel SGX is available" << std::endl;
