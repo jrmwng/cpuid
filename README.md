@@ -47,8 +47,8 @@ CPUID in C++ template, supporting output and input of cpuid data in human friend
 
 ## How to input?
 
-        jrmwng::cpuid_tree_t<0x17> CPUID(ifs);
-        jrmwng::cpuid_tree_t<0x80000008> ExtendedCPUID(ifs);
+        jrmwng::cpuid_tree_t<0x17> CPUID;
+        jrmwng::cpuid_tree_t<0x80000008> ExtendedCPUID;
         
         std::ifstream ifs("cpuid.txt");
         ifs >> CPUID >> ExtendedCPUID;
