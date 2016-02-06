@@ -1005,7 +1005,7 @@ namespace jrmwng
 	}
 
 	template <int nEAX, int nECX = 0>
-	struct alignas(16) cpuid_t
+	struct cpuid_t
 		: cpuid_base_t<nEAX, nECX>
 	{
 		static_assert(sizeof(cpuid_base_t<nEAX, nECX>) == 16, "CPUID expects 4 32-bit integers");
@@ -1170,7 +1170,7 @@ namespace jrmwng
 	template <> struct cpuid_leaf_traits<0x14> { enum { MAX_ECX = 1 }; };
 	template <> struct cpuid_leaf_traits<0x17> { enum { MAX_ECX = 3 }; };
 	template <int nEAX>
-	struct alignas(16) cpuid_leaf_t
+	struct cpuid_leaf_t
 		: cpuid_sub_leaf_t<nEAX, cpuid_leaf_traits<nEAX>::MAX_ECX>
 	{
 		cpuid_leaf_t()
@@ -1201,7 +1201,7 @@ namespace jrmwng
 	//
 
 	template <int nEAX>
-	struct alignas(16) cpuid_tree_t
+	struct cpuid_tree_t
 		: cpuid_tree_t<nEAX - 1>
 		, cpuid_leaf_t<nEAX>
 	{
@@ -1231,7 +1231,7 @@ namespace jrmwng
 		}
 	};
 	template <>
-	struct alignas(16) cpuid_tree_t<0>
+	struct cpuid_tree_t<0>
 		: cpuid_leaf_t<0>
 	{
 		cpuid_tree_t()
@@ -1249,7 +1249,7 @@ namespace jrmwng
 		}
 	};
 	template <>
-	struct alignas(16) cpuid_tree_t<0x80000000>
+	struct cpuid_tree_t<0x80000000>
 		: cpuid_leaf_t<0x80000000>
 	{
 		cpuid_tree_t()
