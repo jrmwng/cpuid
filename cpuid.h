@@ -237,7 +237,7 @@ namespace jrmwng
 
 		unsigned max_sub_leaf() const
 		{
-			return ~0;
+			return ~0U;
 		}
 		bool is_sub_leaf(unsigned) const
 		{
@@ -500,7 +500,7 @@ namespace jrmwng
 
 		unsigned max_sub_leaf() const
 		{
-			return ~0;
+			return ~0U;
 		}
 		bool is_sub_leaf(unsigned) const
 		{
@@ -1056,7 +1056,8 @@ namespace jrmwng
 
 			std::streampos uPos = is.tellg();
 
-			unsigned uEAX = ~nEAX, uECX = ~nECX;
+			unsigned uEAX = static_cast<unsigned>(~nEAX);
+			unsigned uECX = static_cast<unsigned>(~nECX);
 			{
 				int nMask = is.setf(std::ios_base::hex | std::ios_base::skipws);
 				is.unsetf(std::ios_base::dec);
