@@ -112,10 +112,10 @@ CPUID in C++ template, supporting output and input of cpuid data in human friend
       else if (CPUID.uBMI1 || CPUID.uBMI2)
       	std::cout << "BMI is available (some)" << std::endl;
       	
-      if (CPUID.uHLE && CPUID.uRTM)
-      	std::cout << "Intel TSX is available (all)" << std::endl;
-      else if (CPUID.uHLE || CPUID.uRTM)
-      	std::cout << "Intel TSX is available (some)" << std::endl;
+      if (CPUID.uHLE)
+      	std::cout << "HLE is available" << std::endl;
+      if (CPUID.uRTM)
+      	std::cout << "RTM is available" << std::endl;
       
       if (CPUID.uIntelMPX)
       	std::cout << "Intel MPX is available" << std::endl;
