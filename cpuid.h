@@ -26,7 +26,7 @@ namespace jrmwng
 		}
 	};
 	template <int nEAX, int nECX>
-	std::ostream & operator << (std::ostream & os, cpuid_base_t<nEAX, nECX> const & cpuid)
+	std::ostream & operator << (std::ostream & os, cpuid_base_t<nEAX, nECX> const &)
 	{
 		return os;
 	}
@@ -36,11 +36,11 @@ namespace jrmwng
 		// eax
 		unsigned uMaxLeaf : 32;
 		// ebx
-		unsigned uEBX : 32;
+		unsigned : 32;
 		// ecx
-		unsigned uECX : 32;
+		unsigned : 32;
 		// edx
-		unsigned uEDX : 32;
+		unsigned : 32;
 
 		unsigned max_leaf() const
 		{
@@ -49,7 +49,7 @@ namespace jrmwng
 
 		__m128i vendor_identification_string() const
 		{
-			return _mm_set_epi32(0, uECX, uEDX, uEBX);
+			return _mm_set_epi32(0, reinterpret_cast<int const*>(this)[2], reinterpret_cast<int const*>(this)[3], reinterpret_cast<int const*>(this)[1]);
 		}
 	};
 	template <>
@@ -262,15 +262,15 @@ namespace jrmwng
 		}
 		return os <<
 			'L' << (cpuid.uCacheLevel) << ' ' <<
-			std::setw(2) << (cpuid.uMaximumNumberOfAddressableIDsForLogicalProcessors + 1) << "processors" << ' ' <<
-			std::setw(1) << (cpuid.uMaximumNumberOfAddressableIDsForProcessorCores + 1) << "cores" << ' ' <<
-			std::setw(2) << (cpuid.uWaysOfAssociativity + 1) << "ways" << ' ' <<
+			std::setw(2) << (cpuid.uMaximumNumberOfAddressableIDsForLogicalProcessors + 1) << "processor(s)" << ' ' <<
+			std::setw(1) << (cpuid.uMaximumNumberOfAddressableIDsForProcessorCores + 1) << "core(s)" << ' ' <<
+			std::setw(2) << (cpuid.uWaysOfAssociativity + 1) << "way(s)" << ' ' <<
 			'*' << ' ' <<
-			std::setw(1) << (cpuid.uPhysicalLinePartitions + 1) << "partitions" << ' ' <<
+			std::setw(1) << (cpuid.uPhysicalLinePartitions + 1) << "partition(s)" << ' ' <<
 			'*' << ' ' <<
 			std::setw(2) << (cpuid.uSystemCoherencyLineSize + 1) << "B" << ' ' <<
 			'*' << ' ' <<
-			std::setw(4) << (cpuid.uNumberOfSets + 1) << "sets" << ' ';
+			std::setw(4) << (cpuid.uNumberOfSets + 1) << "set(s)" << ' ';
 	}
 	template <> struct cpuid_base_t<0x05>
 	{
@@ -513,17 +513,20 @@ namespace jrmwng
 		{
 		case 0:
 			os << "Invalid" << ' ';
-			break;
+			return os;
 		case 1:
-			os << "SMT" << ' ';
+			os << std::setw(8) << "SMT" << ' ';
 			break;
 		case 2:
-			os << "Core" << ' ';
+			os << std::setw(8) << "Core" << ' ';
 			break;
 		default:
-			os << "Reserved" << ' ';
+			os << std::setw(8) << "Reserved" << ' ';
 			break;
 		}
+		os << "x2APIC-ID=" << cpuid.u_x2APIC_ID << ' ';
+		os << "Topology-ID=" << (cpuid.u_x2APIC_ID >> cpuid.uNumOfBitsToShift) << ' ';
+		os << "Logical-Processor=" << (cpuid.uNumOfLogicalProcessors) << ' ';
 		return os;
 	}
 	template <> struct cpuid_base_t<0x0D>
@@ -611,14 +614,14 @@ namespace jrmwng
 			return static_cast<unsigned>(nECX) <= uMaxECX;
 		}
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 2> const & cpuid) { return os << "AVX"; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 3> const & cpuid) { return os << "BNGREG"; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 4> const & cpuid) { return os << "BNGCSR"; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 5> const & cpuid) { return os << "Opmask"; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 6> const & cpuid) { return os << "ZMM_Hi256"; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 7> const & cpuid) { return os << "Hi16_ZMM"; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 8> const & cpuid) { return os << "PT"; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 9> const & cpuid) { return os << "PKRU"; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 2> const & cpuid) { return os << "AVX      " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 3> const & cpuid) { return os << "BNGREG   " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 4> const & cpuid) { return os << "BNGCSR   " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 5> const & cpuid) { return os << "Opmask   " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 6> const & cpuid) { return os << "ZMM_Hi256" << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 7> const & cpuid) { return os << "Hi16_ZMM " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 8> const & cpuid) { return os << "PT       " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 9> const & cpuid) { return os << "PKRU     " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
 
 	template <> struct cpuid_base_t<0x0F>
 	{
@@ -1089,6 +1092,11 @@ namespace jrmwng
 	{
 		return cpuid.print(os);
 	}
+	template <int nEAX, int nECX>
+	std::istream & operator >> (std::istream & is, cpuid_t<nEAX, nECX> & cpuid)
+	{
+		return cpuid.scan(is);
+	}
 
 	struct cpuid_soc_vendor_brand_string_t
 		: cpuid_t<0x17, 1>
@@ -1100,6 +1108,10 @@ namespace jrmwng
 			return reinterpret_cast<char const*>(this);
 		}
 	};
+	std::ostream & operator << (std::ostream & os, cpuid_soc_vendor_brand_string_t const & cpuid)
+	{
+		return os.write(cpuid, sizeof(cpuid));
+	}
 	struct cpuid_processor_brand_string_t
 		: cpuid_t<0x80000002>
 		, cpuid_t<0x80000003>
@@ -1110,6 +1122,10 @@ namespace jrmwng
 			return reinterpret_cast<char const*>(this);
 		}
 	};
+	std::ostream & operator << (std::ostream & os, cpuid_processor_brand_string_t const & cpuid)
+	{
+		return os.write(cpuid, sizeof(cpuid));
+	}
 
 	//
 	template <int nEAX, int nECX = 0>
@@ -1123,11 +1139,11 @@ namespace jrmwng
 			: cpuid_sub_leaf_t<nEAX, nECX - 1>(is)
 			, cpuid_t<nEAX, nECX>(is)
 		{}
-		std::ostream & print_sub_leaf(std::ostream & os, unsigned uMaxSubLeaf = ~0) const
+		std::ostream & print_sub_leaf(std::ostream & os) const
 		{
-			cpuid_sub_leaf_t<nEAX, nECX - 1>::print_sub_leaf(os, uMaxSubLeaf);
+			cpuid_sub_leaf_t<nEAX, nECX - 1>::print_sub_leaf(os);
 
-			if (cpuid_t<nEAX, nECX>::is_sub_leaf(uMaxSubLeaf))
+			if (cpuid_t<nEAX, nECX>::is_sub_leaf(cpuid_t<nEAX>::max_sub_leaf()))
 			{
 				cpuid_t<nEAX, nECX>::print(os);
 			}
@@ -1148,7 +1164,7 @@ namespace jrmwng
 		cpuid_sub_leaf_t(std::istream & is)
 			: cpuid_t<nEAX>(is)
 		{}
-		std::ostream & print_sub_leaf(std::ostream & os, unsigned uMaxSubLeaf = ~0) const
+		std::ostream & print_sub_leaf(std::ostream & os) const
 		{
 			return cpuid_t<nEAX>::print(os);
 		}
@@ -1178,25 +1194,25 @@ namespace jrmwng
 		cpuid_leaf_t(std::istream & is)
 			: cpuid_sub_leaf_t<nEAX, cpuid_leaf_traits<nEAX>::MAX_ECX>(is)
 		{}
-		template <int nEnable>
 		std::ostream & print_leaf(std::ostream & os) const
-		{
-			return cpuid_sub_leaf_t<nEAX, cpuid_leaf_traits<nEAX>::MAX_ECX>::print_sub_leaf(os, cpuid_t<nEAX>::max_sub_leaf());
-		}
-		template <>
-		std::ostream & print_leaf<0>(std::ostream & os) const
 		{
 			return cpuid_sub_leaf_t<nEAX, cpuid_leaf_traits<nEAX>::MAX_ECX>::print_sub_leaf(os);
-		}
-		std::ostream & print_leaf(std::ostream & os) const
-		{
-			return print_leaf<cpuid_leaf_traits<nEAX>::MAX_ECX>(os);
 		}
 		std::istream & scan_leaf(std::istream & is)
 		{
 			return cpuid_sub_leaf_t<nEAX, cpuid_leaf_traits<nEAX>::MAX_ECX>::scan_sub_leaf(is);
 		}
 	};
+	template <int nEAX>
+	std::ostream & operator << (std::ostream & os, cpuid_leaf_t<nEAX> const & cpuid_leaf)
+	{
+		return cpuid_leaf.print_leaf(os);
+	}
+	template <int nEAX>
+	std::istream & operator >> (std::istream & is, cpuid_leaf_t<nEAX> & cpuid_leaf)
+	{
+		return cpuid_leaf.scan_leaf(is);
+	}
 
 	//
 
@@ -1211,18 +1227,14 @@ namespace jrmwng
 			: cpuid_tree_t<nEAX - 1>(is)
 			, cpuid_leaf_t<nEAX>(is)
 		{}
-		std::ostream & print_tree(std::ostream & os, unsigned uMaxLeaf) const
+		std::ostream & print_tree(std::ostream & os) const
 		{
-			cpuid_tree_t<nEAX - 1>::print_tree(os, uMaxLeaf);
-			if (static_cast<unsigned>(nEAX) <= uMaxLeaf)
+			cpuid_tree_t<nEAX - 1>::print_tree(os);
+			if (static_cast<unsigned>(nEAX) <= max_leaf())
 			{
 				cpuid_leaf_t<nEAX>::print_leaf(os);
 			}
 			return os;
-		}
-		std::ostream & print_tree(std::ostream & os) const
-		{
-			return print_tree(os, max_leaf());
 		}
 		std::istream & scan_tree(std::istream & is)
 		{
@@ -1239,7 +1251,7 @@ namespace jrmwng
 		cpuid_tree_t(std::istream & is)
 			: cpuid_leaf_t<0>(is)
 		{}
-		std::ostream & print_tree(std::ostream & os, unsigned uMaxLeaf = ~0) const
+		std::ostream & print_tree(std::ostream & os) const
 		{
 			return print_leaf(os);
 		}
@@ -1257,7 +1269,7 @@ namespace jrmwng
 		cpuid_tree_t(std::istream & is)
 			: cpuid_leaf_t<0x80000000>(is)
 		{}
-		std::ostream & print_tree(std::ostream & os, unsigned uMaxLeaf = ~0) const
+		std::ostream & print_tree(std::ostream & os) const
 		{
 			return print_leaf(os);
 		}
