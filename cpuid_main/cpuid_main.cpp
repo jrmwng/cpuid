@@ -3,6 +3,7 @@
 /* Author: jrmwng @ 2016 */
 
 #include <fstream>
+#include <Windows.h>
 
 int main()
 {
@@ -10,6 +11,10 @@ int main()
 
 	jrmwng::cpuid_tree_t<0x17> CPUID;
 	jrmwng::cpuid_tree_t<0x80000008> ExtendedCPUID;
+
+	// print CPUID data
+
+	std::cout << CPUID << ExtendedCPUID;
 
 	// output CPUID data to the file "cpuid.txt"
 
@@ -31,10 +36,6 @@ int main()
 		ifs >> CPUID >> ExtendedCPUID;
 		ifs.close();
 	}
-
-	// print CPUID data
-
-	std::cout << CPUID << ExtendedCPUID;
 
 	// print features
 
@@ -68,6 +69,36 @@ int main()
 
 	if (CPUID.uIntelSGX)
 		std::cout << "Intel SGX is available" << std::endl;
+
+	// print strings
+
+	std::cout << CPUID.vendor_identification_string().m128i_i8 << std::endl;
+	std::cout << CPUID.soc_vendor_brand_string() << std::endl;
+	std::cout << ExtendedCPUID.processor_brand_string() << std::endl;
+
+	// print leaf 0x0B
+
+	DWORD_PTR dwProcessAffinityMask = 0;
+	DWORD_PTR dwSystemAffinityMask = 0;
+	if (GetProcessAffinityMask(GetCurrentProcess(), &dwProcessAffinityMask, &dwSystemAffinityMask))
+	{
+		for (DWORD_PTR dwThreadAffinityMask = 1; dwThreadAffinityMask <= dwProcessAffinityMask; dwThreadAffinityMask <<= 1)
+		{
+			if (dwThreadAffinityMask & dwProcessAffinityMask)
+			{
+				dwThreadAffinityMask = SetThreadAffinityMask(GetCurrentThread(), dwThreadAffinityMask);
+				{
+					jrmwng::cpuid_leaf_t<0x01> CPUID01;
+					jrmwng::cpuid_leaf_t<0x0B> CPUID0B;
+
+					std::cout
+						<< "Initial APIC-ID: " << CPUID01.uInitialAPIC_ID << std::endl
+						<< CPUID0B << std::endl;
+				}
+				dwThreadAffinityMask = SetThreadAffinityMask(GetCurrentThread(), dwThreadAffinityMask);
+			}
+		}
+	}
 
 	return 0;
 }
