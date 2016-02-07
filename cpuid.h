@@ -9,7 +9,7 @@
 namespace jrmwng
 {
 	template <int nEAX, int nECX = 0>
-	struct cpuid_base_t
+	struct cpuid_info_t
 	{
 		// eax
 		unsigned : 32;
@@ -26,12 +26,12 @@ namespace jrmwng
 		}
 	};
 	template <int nEAX, int nECX>
-	std::ostream & operator << (std::ostream & os, cpuid_base_t<nEAX, nECX> const &)
+	std::ostream & operator << (std::ostream & os, cpuid_info_t<nEAX, nECX> const &)
 	{
 		return os;
 	}
 
-	template <> struct cpuid_base_t<0x00>
+	template <> struct cpuid_info_t<0x00>
 	{
 		// eax
 		unsigned uMaxLeaf : 32;
@@ -53,15 +53,28 @@ namespace jrmwng
 		}
 	};
 	template <>
-	std::ostream & operator << (std::ostream & os, cpuid_base_t<0x00> const & cpuid)
+	std::ostream & operator << (std::ostream & os, cpuid_info_t<0x00> const & cpuid)
 	{
 		return os << cpuid.vendor_identification_string().m128i_i8;
 	}
 
-	template <> struct cpuid_base_t<0x01>
+	template <> struct cpuid_info_t<0x01>
 	{
 		// eax
-		unsigned : 32;
+		unsigned uSteppingID : 4; // [bits 3:0]
+		unsigned uModelID : 4; // [bits 7:4]
+		unsigned uFamilyID : 4; // [bits 11:8]
+		enum
+		{
+			ORIGINAL_OEM_PROCESSOR = 0,
+			INTEL_OVERDRIVE_PROCESSOR = 1,
+			DUAL_PROCESSOR = 2,
+			INTEL_RESERVED = 3,
+		} emProcessorType : 2;
+		unsigned : 2; // [bits 15:14]
+		unsigned uExtendedModelID : 4; // [bits 19:16]
+		unsigned uExtendedFamilyID : 8; // [bits 27:20]
+		unsigned : 4; // [bits 31:28]
 		// ebx
 		unsigned uProcessorBrandIndex : 8; // [bits 7:0]
 		unsigned uLineSizeCLFLUSH : 8; // [bits 15:8]
@@ -134,10 +147,17 @@ namespace jrmwng
 		unsigned : 1; // bit 30
 		unsigned uPBE : 1; // bit 31: Pending Break Enable
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x01> const & cpuid)
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x01> const & cpuid)
 	{
+		char const cFill = os.fill('0');
+		int const nMasks = os.setf(std::ios_base::hex | std::ios_base::uppercase);
+		os.unsetf(std::ios_base::dec);
+		os <<
+			std::setw(2) << (cpuid.uFamilyID != 0x0F ? cpuid.uFamilyID : (cpuid.uExtendedFamilyID + cpuid.uFamilyID)) << '_' <<
+			std::setw(2) << (cpuid.uFamilyID == 0x06 || cpuid.uFamilyID == 0x0F ? ((cpuid.uExtendedModelID << 4) + cpuid.uModelID) : cpuid.uModelID) << 'H' << ' ';
+		os.setf(nMasks);
+		os.fill(cFill);
 		return os <<
-			"APIC-ID=" << (cpuid.uInitialAPIC_ID) << ' ' <<
 			(cpuid.uSSE3 ? '+' : '-') << "SSE3" << ' ' << //unsigned uSSE3 : 1; // bit 0
 			(cpuid.uPCLMULQDQ ? '+' : '-') << "PCLMULQDQ" << ' ' << //unsigned uPCLMULQDQ : 1; // bit 1
 			//unsigned uDTES64 : 1; // bit 2
@@ -203,18 +223,7 @@ namespace jrmwng
 			//unsigned : 1; // bit 30
 			(cpuid.uPBE ? '+' : '-') << "PBE" << ' ';//unsigned uPBE : 1; // bit 31: Pending Break Enable
 	}
-	template <> struct cpuid_base_t<0x02>
-	{
-		// eax
-		unsigned : 32;
-		// ebx
-		unsigned : 32;
-		// ecx
-		unsigned : 32;
-		// edx
-		unsigned : 32;
-	};
-	template <int nECX> struct cpuid_base_t<0x04, nECX>
+	template <int nECX> struct cpuid_info_t<0x04, nECX>
 	{
 		// eax
 		unsigned uCacheTypeField : 5; // [bits 04:00]
@@ -245,7 +254,7 @@ namespace jrmwng
 			return uCacheTypeField != 0;
 		}
 	};
-	template <int nECX> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x04, nECX> const & cpuid)
+	template <int nECX> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x04, nECX> const & cpuid)
 	{
 		switch (cpuid.uCacheTypeField)
 		{
@@ -273,7 +282,7 @@ namespace jrmwng
 			'*' << ' ' <<
 			std::setw(4) << (cpuid.uNumberOfSets + 1) << "set(s)" << ' ';
 	}
-	template <> struct cpuid_base_t<0x05>
+	template <> struct cpuid_info_t<0x05>
 	{
 		// eax
 		unsigned uSmallestLineSizeMONITOR : 16; // [bits 15:0]
@@ -295,7 +304,7 @@ namespace jrmwng
 		unsigned uNumberOfC6 : 4;
 		unsigned uNumberOfC7 : 4;
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x05> const & cpuid)
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x05> const & cpuid)
 	{
 		return os <<
 			'[' << (cpuid.uSmallestLineSizeMONITOR) << 'B' << ',' << (cpuid.uLargestLineSizeMONITOR) << 'B' << ']' << ' ' <<
@@ -310,7 +319,7 @@ namespace jrmwng
 			"C6/" << (cpuid.uNumberOfC6) << ' ' <<
 			"C7/" << (cpuid.uNumberOfC7) << ' ';
 	}
-	template <> struct cpuid_base_t<0x06>
+	template <> struct cpuid_info_t<0x06>
 	{
 		// eax
 		unsigned uDigitalThermalSensor : 1; // bit 0
@@ -339,7 +348,7 @@ namespace jrmwng
 		// edx
 		unsigned : 32;
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x06> const & cpuid)
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x06> const & cpuid)
 	{
 		return os <<
 			(cpuid.uDigitalThermalSensor ? '+' : '-') << "ThermalSensor" << ' ' <<
@@ -352,7 +361,7 @@ namespace jrmwng
 			(cpuid.uHDC ? '+' : '-') << "HDC" << ' ' <<
 			(cpuid.uSETBH ? '+' : '-') << "SETBH" << ' ';
 	}
-	template <> struct cpuid_base_t<0x07>
+	template <> struct cpuid_info_t<0x07>
 	{
 		// eax
 		unsigned uMaxSubLeaf : 32;
@@ -404,7 +413,7 @@ namespace jrmwng
 			return uMaxSubLeaf;
 		}
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x07> const & cpuid)
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x07> const & cpuid)
 	{
 		return os <<
 			(cpuid.uFSGSBASE ? '+' : '-') << "FSGSBASE" << ' ' <<
@@ -441,7 +450,7 @@ namespace jrmwng
 			(cpuid.uPKU ? '+' : '-') << "PKU" << ' ' <<
 			(cpuid.uOSPKE ? '+' : '-') << "OSPKE" << ' ';
 	}
-	template <> struct cpuid_base_t<0x09>
+	template <> struct cpuid_info_t<0x09>
 	{
 		// eax
 		unsigned uIA32_PLATFORM_DCA_CAP : 32;
@@ -452,7 +461,7 @@ namespace jrmwng
 		// edx
 		unsigned : 32;
 	};
-	template <> struct cpuid_base_t<0x0A>
+	template <> struct cpuid_info_t<0x0A>
 	{
 		// eax
 		unsigned uVersionID : 8; // [bits 7:0]: Version ID of architectural performance monitoring
@@ -475,7 +484,7 @@ namespace jrmwng
 		unsigned uBitWidthOfFixedFunctionPerformanceCounters : 8; // [bits 12:5]
 		unsigned : 19;
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0A> const & cpuid)
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0A> const & cpuid)
 	{
 		os << (cpuid.uNumOfGP) << '*' << (cpuid.uBitWidthOfGP) << 'b' << ' ';
 		if (cpuid.uVersionID > 1)
@@ -484,7 +493,7 @@ namespace jrmwng
 		}
 		return os;
 	}
-	template <int nECX> struct cpuid_base_t<0x0B, nECX>
+	template <int nECX> struct cpuid_info_t<0x0B, nECX>
 	{
 		// eax
 		unsigned uNumOfBitsToShift : 5; // [bits 4:0]
@@ -508,7 +517,7 @@ namespace jrmwng
 			return uLevelType != 0;
 		}
 	};
-	template <int nECX> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0B, nECX> const & cpuid)
+	template <int nECX> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0B, nECX> const & cpuid)
 	{
 		switch (cpuid.uLevelType)
 		{
@@ -530,7 +539,7 @@ namespace jrmwng
 		os << "Logical-Processor=" << (cpuid.uNumOfLogicalProcessors) << ' ';
 		return os;
 	}
-	template <> struct cpuid_base_t<0x0D>
+	template <> struct cpuid_info_t<0x0D>
 	{
 		// eax
 		unsigned uStateX87 : 1; // bit 0
@@ -556,7 +565,7 @@ namespace jrmwng
 			return uIndex;
 		}
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D> const & cpuid)
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D> const & cpuid)
 	{
 		return os <<
 			(cpuid.uStateX87 ? '+' : '-') << "x87" << ' ' <<
@@ -569,7 +578,7 @@ namespace jrmwng
 			(cpuid.uSizeXCR0) << 'B' << ' ' <<
 			(cpuid.uSize) << 'B' << ' ';
 	}
-	template <> struct cpuid_base_t<0x0D, 1>
+	template <> struct cpuid_info_t<0x0D, 1>
 	{
 		// eax
 		unsigned uXSAVEOPT : 1; // bit 0
@@ -588,7 +597,7 @@ namespace jrmwng
 			return true;
 		}
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 1> const & cpuid)
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 1> const & cpuid)
 	{
 		return os <<
 			(cpuid.uXSAVEOPT ? '+' : '-') << "XSAVEOPT" << ' ' <<
@@ -597,7 +606,7 @@ namespace jrmwng
 			(cpuid.uXSAVES_IA32_XSS ? '+' : '-') << "XSAVES-IA32_XSS" << ' ' <<
 			(cpuid.uSize) << 'B' << ' ';
 	}
-	template <int nECX> struct cpuid_base_t<0x0D, nECX> // AVX state, BNGREG state, BNDCSR state, Opmask state, ZMM_Hi256 state, Hi16_ZMM state, PT state, PKRU state
+	template <int nECX> struct cpuid_info_t<0x0D, nECX> // AVX state, BNGREG state, BNDCSR state, Opmask state, ZMM_Hi256 state, Hi16_ZMM state, PT state, PKRU state
 	{
 		// eax
 		unsigned uSize;
@@ -615,16 +624,16 @@ namespace jrmwng
 			return static_cast<unsigned>(nECX) <= uMaxECX;
 		}
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 2> const & cpuid) { return os << "AVX      " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 3> const & cpuid) { return os << "BNGREG   " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 4> const & cpuid) { return os << "BNGCSR   " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 5> const & cpuid) { return os << "Opmask   " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 6> const & cpuid) { return os << "ZMM_Hi256" << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 7> const & cpuid) { return os << "Hi16_ZMM " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 8> const & cpuid) { return os << "PT       " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x0D, 9> const & cpuid) { return os << "PKRU     " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 2> const & cpuid) { return os << "AVX      " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 3> const & cpuid) { return os << "BNGREG   " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 4> const & cpuid) { return os << "BNGCSR   " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 5> const & cpuid) { return os << "Opmask   " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 6> const & cpuid) { return os << "ZMM_Hi256" << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 7> const & cpuid) { return os << "Hi16_ZMM " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 8> const & cpuid) { return os << "PT       " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 9> const & cpuid) { return os << "PKRU     " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
 
-	template <> struct cpuid_base_t<0x0F>
+	template <> struct cpuid_info_t<0x0F>
 	{
 		// eax
 		unsigned : 32;
@@ -644,7 +653,7 @@ namespace jrmwng
 			return uIndex;
 		}
 	};
-	template <> struct cpuid_base_t<0x0F, 1>
+	template <> struct cpuid_info_t<0x0F, 1>
 	{
 		// eax
 		unsigned : 32;
@@ -661,7 +670,7 @@ namespace jrmwng
 			return 1 <= uMaxECX;
 		}
 	};
-	template <> struct cpuid_base_t<0x10>
+	template <> struct cpuid_info_t<0x10>
 	{
 		// eax
 		unsigned : 32;
@@ -681,7 +690,7 @@ namespace jrmwng
 			return uIndex;
 		}
 	};
-	template <> struct cpuid_base_t<0x10, 1>
+	template <> struct cpuid_info_t<0x10, 1>
 	{
 		// eax
 		unsigned uNumOfCapacity : 5; // [bits 4:0]
@@ -702,7 +711,7 @@ namespace jrmwng
 			return 1 <= uMaxECX;
 		}
 	};
-	template <> struct cpuid_base_t<0x12>
+	template <> struct cpuid_info_t<0x12>
 	{
 		// eax
 		unsigned uSGX1 : 1; // bit 0
@@ -717,13 +726,13 @@ namespace jrmwng
 		unsigned uMaxEnclaveSize_64 : 8; // [15:8]
 		unsigned : 16;
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x12> const & cpuid)
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x12> const & cpuid)
 	{
 		return os <<
 			(cpuid.uSGX1 ? '+' : '-') << "SGX1" << ' ' <<
 			(cpuid.uSGX2 ? '+' : '-') << "SGX2" << ' ';
 	}
-	template <> struct cpuid_base_t<0x14>
+	template <> struct cpuid_info_t<0x14>
 	{
 		// eax
 		unsigned uMaxSubLeaf : 32;
@@ -748,7 +757,7 @@ namespace jrmwng
 			return uMaxSubLeaf;
 		}
 	};
-	template <> struct cpuid_base_t<0x14, 1>
+	template <> struct cpuid_info_t<0x14, 1>
 	{
 		// eax
 		unsigned uNumOfConfigurableAddressRanges : 3; // [bits 2:0]
@@ -767,7 +776,7 @@ namespace jrmwng
 			return 1 <= uMaxECX;
 		}
 	};
-	template <> struct cpuid_base_t<0x15>
+	template <> struct cpuid_info_t<0x15>
 	{
 		// eax
 		unsigned uCoreCrystalClock : 32;
@@ -778,12 +787,12 @@ namespace jrmwng
 		// edx
 		unsigned : 32;
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x15> const & cpuid)
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x15> const & cpuid)
 	{
 		return os <<
 			cpuid.uTSC << '/' << cpuid.uCoreCrystalClock << ' ';
 	}
-	template <> struct cpuid_base_t<0x16>
+	template <> struct cpuid_info_t<0x16>
 	{
 		// eax
 		unsigned uProcessorBaseFrequencyMHz : 16; // [bits 15:0]
@@ -797,14 +806,14 @@ namespace jrmwng
 		// edx
 		unsigned : 32;
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x16> const & cpuid)
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x16> const & cpuid)
 	{
 		return os <<
 			cpuid.uProcessorBaseFrequencyMHz << "MHz" << ' ' <<
 			cpuid.uMaximumFrequencyMHz << "MHz" << ' ' <<
 			cpuid.uBusFrequencyMHz << "MHz" << ' ';
 	}
-	template <> struct cpuid_base_t<0x17>
+	template <> struct cpuid_info_t<0x17>
 	{
 		// eax
 		unsigned uMaxSOCID_Index : 32;
@@ -822,7 +831,7 @@ namespace jrmwng
 			return uMaxSOCID_Index;
 		}
 	};
-	template <> struct cpuid_base_t<0x17, 1>
+	template <> struct cpuid_info_t<0x17, 1>
 	{
 		char ac[16];
 
@@ -835,7 +844,7 @@ namespace jrmwng
 			return 1 <= uMaxECX;
 		}
 	};
-	template <> struct cpuid_base_t<0x17, 2>
+	template <> struct cpuid_info_t<0x17, 2>
 	{
 		char ac[16];
 
@@ -844,7 +853,7 @@ namespace jrmwng
 			return 2 <= uMaxECX;
 		}
 	};
-	template <> struct cpuid_base_t<0x17, 3>
+	template <> struct cpuid_info_t<0x17, 3>
 	{
 		char ac[16];
 
@@ -853,11 +862,11 @@ namespace jrmwng
 			return 3 <= uMaxECX;
 		}
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x17, 1> const & cpuid) { return os.write(cpuid.ac, 16); }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x17, 2> const & cpuid) { return os.write(cpuid.ac, 16); }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x17, 3> const & cpuid) { return os.write(cpuid.ac, 16); }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x17, 1> const & cpuid) { return os.write(cpuid.ac, 16); }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x17, 2> const & cpuid) { return os.write(cpuid.ac, 16); }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x17, 3> const & cpuid) { return os.write(cpuid.ac, 16); }
 
-	template <> struct cpuid_base_t<0x80000000>
+	template <> struct cpuid_info_t<0x80000000>
 	{
 		// eax
 		unsigned uMaxLeaf : 32;
@@ -873,7 +882,7 @@ namespace jrmwng
 			return uMaxLeaf;
 		}
 	};
-	template <> struct cpuid_base_t<0x80000001>
+	template <> struct cpuid_info_t<0x80000001>
 	{
 		// eax
 		unsigned uExtendedProcessorSignatureAndFeatureBits : 32;
@@ -898,7 +907,7 @@ namespace jrmwng
 		unsigned uIntel64 : 1; // bit 29
 		unsigned : 2;
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x80000001> const & cpuid)
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000001> const & cpuid)
 	{
 		return os <<
 			(cpuid.uLZCNT ? '+' : '-') << "LZCNT" << ' ' <<
@@ -907,7 +916,7 @@ namespace jrmwng
 			(cpuid.uRDTSCP ? '+' : '-') << "RDTSCP" << ' ' <<
 			(cpuid.uIntel64 ? '+' : '-') << "x64" << ' ';
 	}
-	template <> struct cpuid_base_t<0x80000002>
+	template <> struct cpuid_info_t<0x80000002>
 	{
 		char ac[16];
 
@@ -916,18 +925,18 @@ namespace jrmwng
 			return ac;
 		}
 	};
-	template <> struct cpuid_base_t<0x80000003>
+	template <> struct cpuid_info_t<0x80000003>
 	{
 		char ac[16];
 	};
-	template <> struct cpuid_base_t<0x80000004>
+	template <> struct cpuid_info_t<0x80000004>
 	{
 		char ac[16];
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x80000002> const & cpuid) { return os.write(cpuid.ac, 16); }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x80000003> const & cpuid) { return os.write(cpuid.ac, 16); }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x80000004> const & cpuid) { return os.write(cpuid.ac, 16); }
-	template <> struct cpuid_base_t<0x80000006>
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000002> const & cpuid) { return os.write(cpuid.ac, 16); }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000003> const & cpuid) { return os.write(cpuid.ac, 16); }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000004> const & cpuid) { return os.write(cpuid.ac, 16); }
+	template <> struct cpuid_info_t<0x80000006>
 	{
 		// eax
 		unsigned : 32;
@@ -941,7 +950,7 @@ namespace jrmwng
 		// edx
 		unsigned : 32;
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x80000006> const & cpuid)
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000006> const & cpuid)
 	{
 		os << (cpuid.uCacheLineSize) << "B" << ' ';
 		switch (cpuid.uL2Associativity)
@@ -970,7 +979,7 @@ namespace jrmwng
 		}
 		return os << (cpuid.uCacheSize1K) << "KB" << ' ';
 	}
-	template <> struct cpuid_base_t<0x80000007>
+	template <> struct cpuid_info_t<0x80000007>
 	{
 		// eax
 		unsigned : 32;
@@ -983,12 +992,12 @@ namespace jrmwng
 		unsigned uInvariantTSC : 1; // bit 8
 		unsigned : 23;
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x80000007> const & cpuid)
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000007> const & cpuid)
 	{
 		return os <<
 			(cpuid.uInvariantTSC ? '+' : '-') << "InvariantTSC" << ' ';
 	}
-	template <> struct cpuid_base_t<0x80000008>
+	template <> struct cpuid_info_t<0x80000008>
 	{
 		// eax
 		unsigned uNumOfPhysicalAddressBits : 8; // [bits 7:0]
@@ -1001,7 +1010,7 @@ namespace jrmwng
 		// edx
 		unsigned : 32;
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x80000008> const & cpuid)
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000008> const & cpuid)
 	{
 		return os <<
 			(cpuid.uNumOfPhysicalAddressBits) << 'b' << ' ' <<
@@ -1010,9 +1019,9 @@ namespace jrmwng
 
 	template <int nEAX, int nECX = 0>
 	struct cpuid_t
-		: cpuid_base_t<nEAX, nECX>
+		: cpuid_info_t<nEAX, nECX>
 	{
-		static_assert(sizeof(cpuid_base_t<nEAX, nECX>) == 16, "CPUID expects 4 32-bit integers");
+		static_assert(sizeof(cpuid_info_t<nEAX, nECX>) == 16, "CPUID expects 4 32-bit integers");
 
 		cpuid_t()
 		{
@@ -1040,7 +1049,7 @@ namespace jrmwng
 				std::setw(8) << reinterpret_cast<unsigned const*>(this)[3] << ' ';
 			os.setf(nMask);
 			os <<
-				static_cast<cpuid_base_t<nEAX, nECX>const&>(*this) << std::endl;
+				static_cast<cpuid_info_t<nEAX, nECX>const&>(*this) << std::endl;
 			return os;
 		}
 		std::istream & scan(std::istream & is)
