@@ -137,6 +137,7 @@ namespace jrmwng
 	template <> std::ostream & operator << (std::ostream & os, cpuid_base_t<0x01> const & cpuid)
 	{
 		return os <<
+			"APIC-ID=" << (cpuid.uInitialAPIC_ID) << ' ' <<
 			(cpuid.uSSE3 ? '+' : '-') << "SSE3" << ' ' << //unsigned uSSE3 : 1; // bit 0
 			(cpuid.uPCLMULQDQ ? '+' : '-') << "PCLMULQDQ" << ' ' << //unsigned uPCLMULQDQ : 1; // bit 1
 			//unsigned uDTES64 : 1; // bit 2
@@ -205,13 +206,13 @@ namespace jrmwng
 	template <> struct cpuid_base_t<0x02>
 	{
 		// eax
-		unsigned uEAX;
+		unsigned : 32;
 		// ebx
-		unsigned uEBX;
+		unsigned : 32;
 		// ecx
-		unsigned uECX;
+		unsigned : 32;
 		// edx
-		unsigned uEDX;
+		unsigned : 32;
 	};
 	template <int nECX> struct cpuid_base_t<0x04, nECX>
 	{
@@ -1080,10 +1081,10 @@ namespace jrmwng
 				return is;
 			}
 
-			char ac[2000];
+			char acLocal[2000];
 			do
 			{
-				is.getline(ac, std::size(ac));
+				is.getline(acLocal, std::size(acLocal));
 			} while (is.fail() && !is.eof());
 			return is;
 		}
