@@ -226,7 +226,13 @@ namespace jrmwng
 	template <int nECX> struct cpuid_info_t<0x04, nECX>
 	{
 		// eax
-		unsigned uCacheTypeField : 5; // [bits 04:00]
+		enum
+		{
+			NO_MORE_CACHES = 0,
+			DATA_CACHE = 1,
+			INSTRUCTION_CACHE = 2,
+			UNIFIED_CACHE = 3,
+		} emCacheTypeField: 5; // [bits 04:00]
 		unsigned uCacheLevel : 3; // [bits 07:05]
 		unsigned uSelfInitializingCacheLevel : 1; // bit 8
 		unsigned uFullyAssociativeCache : 1; // bit 9
@@ -251,22 +257,22 @@ namespace jrmwng
 		}
 		bool is_sub_leaf(unsigned) const
 		{
-			return uCacheTypeField != 0;
+			return emCacheTypeField != NO_MORE_CACHES;
 		}
 	};
 	template <int nECX> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x04, nECX> const & cpuid)
 	{
-		switch (cpuid.uCacheTypeField)
+		switch (cpuid.emCacheTypeField)
 		{
-		case 0:
+		case cpuid.NO_MORE_CACHES:
 			return os;
-		case 1:
+		case cpuid.DATA_CACHE:
 			os << "D-Cache" << ' ';
 			break;
-		case 2:
+		case cpuid.INSTRUCTION_CACHE:
 			os << "I-Cache" << ' ';
 			break;
-		case 3:
+		case cpuid.UNIFIED_CACHE:
 			os << "U-Cache" << ' ';
 			break;
 		}
