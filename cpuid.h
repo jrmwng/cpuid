@@ -553,7 +553,9 @@ namespace jrmwng
 		unsigned uStateAVX : 1;
 		unsigned uStateBNDREGS : 1; // bit 3
 		unsigned uStateBNDCSR : 1; // bit 4
-		unsigned uStateAVX512 : 3; // [bits 7:5]
+		unsigned uStateOpmask : 1; // bit 5
+		unsigned uStateZMM_Hi256 : 1; // bit 6
+		unsigned uStateHi16_ZMM : 1; // bit 7
 		unsigned uStatePT : 1; // bit 8
 		unsigned uStatePKRU : 1; // bit 9
 		unsigned : 22;
@@ -579,6 +581,9 @@ namespace jrmwng
 			(cpuid.uStateAVX ? '+' : '-') << "AVX" << ' ' <<
 			(cpuid.uStateBNDREGS ? '+' : '-') << "BNDREGS" << ' ' <<
 			(cpuid.uStateBNDCSR ? '+' : '-') << "BNDCSR" << ' ' <<
+			(cpuid.uStateOpmask ? '+' : '-') << "Opmask" << ' ' <<
+			(cpuid.uStateZMM_Hi256 ? '+' : '-') << "ZMM_Hi256" << ' ' <<
+			(cpuid.uStateHi16_ZMM ? '+' : '-') << "Hi16_ZMM" << ' ' <<
 			(cpuid.uStatePT ? '+' : '-') << "PT" << ' ' <<
 			(cpuid.uStatePKRU ? '+' : '-') << "PKRU" << ' ' <<
 			(cpuid.uSizeXCR0) << 'B' << ' ' <<
