@@ -276,17 +276,17 @@ namespace jrmwng
 			os << " U-Cache";
 			break;
 		}
-		return os <<
-			'L' << (cpuid.uCacheLevel) << ' ' <<
-			std::setw(2) << (cpuid.uMaximumNumberOfAddressableIDsForLogicalProcessors ? " +processor(s)" : " -processor(s)") <<
-			std::setw(1) << (cpuid.uMaximumNumberOfAddressableIDsForProcessorCores ? " +core(s)" : " -core(s)") <<
-			std::setw(2) << (cpuid.uWaysOfAssociativity ? " +way(s)" : " -way(s)") <<
-			'*' << ' ' <<
-			std::setw(1) << (cpuid.uPhysicalLinePartitions ? " +partition(s)" : " -partition(s)") <<
-			'*' << ' ' <<
-			std::setw(2) << (cpuid.uSystemCoherencyLineSize ? " +B" : " -B") <<
-			'*' << ' ' <<
-			std::setw(4) << (cpuid.uNumberOfSets ? " +set(s)" : " -set(s)");
+		return os
+			<< " L" << (cpuid.uCacheLevel)
+			<< ' ' << std::setw(2) << (cpuid.uMaximumNumberOfAddressableIDsForLogicalProcessors + 1) << "processor(s)"
+			<< ' ' << std::setw(1) << (cpuid.uMaximumNumberOfAddressableIDsForProcessorCores + 1) << "core(s)"
+			<< ' ' << std::setw(2) << (cpuid.uWaysOfAssociativity + 1) << "way(s)"
+			<< " *"
+			<< ' ' << std::setw(1) << (cpuid.uPhysicalLinePartitions + 1) << "partition(s)"
+			<< " *"
+			<< ' ' << std::setw(2) << (cpuid.uSystemCoherencyLineSize + 1) << 'B'
+			<< " *"
+			<< ' ' << std::setw(4) << (cpuid.uNumberOfSets + 1) << "set(s)";
 	}
 	template <> struct cpuid_info_t<0x05>
 	{
@@ -963,32 +963,32 @@ namespace jrmwng
 	};
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000006> const & cpuid)
 	{
-		os << (cpuid.uCacheLineSize ? " +B " : " -B ");
+		os << ' ' << cpuid.uCacheLineSize << 'B';
 		switch (cpuid.uL2Associativity)
 		{
 		case 0:
-			os << " Disabled ";
+			os << " Disabled";
 			break;
 		case 1:
-			os << " DirectMapped ";
+			os << " DirectMapped";
 			break;
 		case 2:
-			os << " 2-way ";
+			os << " 2-way";
 			break;
 		case 4:
-			os << " 4-way ";
+			os << " 4-way";
 			break;
 		case 6:
-			os << " 8-way ";
+			os << " 8-way";
 			break;
 		case 8:
-			os << " 16-way ";
+			os << " 16-way";
 			break;
 		case 0xF:
-			os << " FullyAssociative ";
+			os << " FullyAssociative";
 			break;
 		}
-		return os << (cpuid.uCacheSize1K ? " +KB " : " -KB ");
+		return os << ' ' << cpuid.uCacheSize1K << "KB";
 	}
 	template <> struct cpuid_info_t<0x80000007>
 	{
