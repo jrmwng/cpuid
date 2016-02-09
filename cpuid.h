@@ -55,7 +55,7 @@ namespace jrmwng
 	template <>
 	std::ostream & operator << (std::ostream & os, cpuid_info_t<0x00> const & cpuid)
 	{
-		return os << cpuid.vendor_identification_string().m128i_i8;
+		return os << ' ' << cpuid.vendor_identification_string().m128i_i8;
 	}
 
 	template <> struct cpuid_info_t<0x01>
@@ -152,76 +152,76 @@ namespace jrmwng
 		char const cFill = os.fill('0');
 		int const nMasks = os.setf(std::ios_base::hex | std::ios_base::uppercase);
 		os.unsetf(std::ios_base::dec);
-		os <<
-			std::setw(2) << (cpuid.uFamilyID != 0x0F ? cpuid.uFamilyID : (cpuid.uExtendedFamilyID + cpuid.uFamilyID)) << '_' <<
-			std::setw(2) << (cpuid.uFamilyID == 0x06 || cpuid.uFamilyID == 0x0F ? ((cpuid.uExtendedModelID << 4) + cpuid.uModelID) : cpuid.uModelID) << 'H' << ' ';
+		os
+			<< ' ' << std::setw(2) << (cpuid.uFamilyID != 0x0F ? cpuid.uFamilyID : (cpuid.uExtendedFamilyID + cpuid.uFamilyID))
+			<< '_' << std::setw(2) << (cpuid.uFamilyID == 0x06 || cpuid.uFamilyID == 0x0F ? ((cpuid.uExtendedModelID << 4) + cpuid.uModelID) : cpuid.uModelID) << 'H';
 		os.setf(nMasks);
 		os.fill(cFill);
 		return os <<
-			(cpuid.uSSE3 ? '+' : '-') << "SSE3" << ' ' << //unsigned uSSE3 : 1; // bit 0
-			(cpuid.uPCLMULQDQ ? '+' : '-') << "PCLMULQDQ" << ' ' << //unsigned uPCLMULQDQ : 1; // bit 1
+			(cpuid.uSSE3 ? " +SSE3" : " -SSE3") << //unsigned uSSE3 : 1; // bit 0
+			(cpuid.uPCLMULQDQ ? " +PCLMULQDQ" : " -PCLMULQDQ") << //unsigned uPCLMULQDQ : 1; // bit 1
 			//unsigned uDTES64 : 1; // bit 2
-			(cpuid.uMONITOR ? '+' : '-') << "MONITOR" << ' ' << //unsigned uMONITOR : 1; // bit 3
+			(cpuid.uMONITOR ? " +MONITOR" : " -MONITOR") << //unsigned uMONITOR : 1; // bit 3
 			//unsigned uDS_CPL : 1; // bit 4
-			(cpuid.uVMX ? '+' : '-') << "VMX" << ' ' << //unsigned uVMX : 1; // bit 5
-			(cpuid.uSMX ? '+' : '-') << "SMX" << ' ' << //unsigned uSMX : 1; // bit 6: Safer Mode Extensions
-			(cpuid.uEIST ? '+' : '-') << "EIST" << ' ' << //unsigned uEIST : 1; // bit 7: Enhanced Intel SpeedStep technology
-			(cpuid.uTM2 ? '+' : '-') << "TM2" << ' ' << //unsigned uTM2 : 1; // bit 8: Thermal Monitor 2
-			(cpuid.uSSSE3 ? '+' : '-') << "SSSE3" << ' ' << //unsigned uSSSE3 : 1; // bit 9
+			(cpuid.uVMX ? " +VMX" : " -VMX") << //unsigned uVMX : 1; // bit 5
+			(cpuid.uSMX ? " +SMX" : " -SMX") << //unsigned uSMX : 1; // bit 6: Safer Mode Extensions
+			(cpuid.uEIST ? " +EIST" : " -EIST") << //unsigned uEIST : 1; // bit 7: Enhanced Intel SpeedStep technology
+			(cpuid.uTM2 ? " +TM2" : " -TM2") << //unsigned uTM2 : 1; // bit 8: Thermal Monitor 2
+			(cpuid.uSSSE3 ? " +SSSE3" : " -SSSE3") << //unsigned uSSSE3 : 1; // bit 9
 			//unsigned uCNXT_ID : 1; // bit 10: L1 Context ID
 			//unsigned uSDBG : 1; // bit 11
-			(cpuid.uFMA ? '+' : '-') << "FMA" << ' ' << //unsigned uFMA : 1; // bit 12
-			(cpuid.uCMPXCHG16B ? '+' : '-') << "CMPXCHG16B" << ' ' << //unsigned uCMPXCHG16B : 1; // bit 13
+			(cpuid.uFMA ? " +FMA" : " -FMA") << //unsigned uFMA : 1; // bit 12
+			(cpuid.uCMPXCHG16B ? " +CMPXCHG16B" : " -CMPXCHG16B") << //unsigned uCMPXCHG16B : 1; // bit 13
 			//unsigned u_xTPR_UpdateControl : 1; // bit 14
-			(cpuid.uPDCM ? '+' : '-') << "PDCM" << ' ' << //unsigned uPDCM : 1; // bit 15: Perfmon and Debug Capability
+			(cpuid.uPDCM ? " +PDCM" : " -PDCM") << //unsigned uPDCM : 1; // bit 15: Perfmon and Debug Capability
 			//unsigned : 1; // bit 16
 			//unsigned uPCID : 1; // bit 17: Process-context identifiers
 			//unsigned uDCA : 1; // bit 18
-			(cpuid.uSSE4_1 ? '+' : '-') << "SSE4.1" << ' ' << //unsigned uSSE4_1 : 1; // bit 19
-			(cpuid.uSSE4_2 ? '+' : '-') << "SSE4.2" << ' ' << //unsigned uSSE4_2 : 1; // bit 20
-			(cpuid.u_x2APIC ? '+' : '-') << "x2APIC" << ' ' << //unsigned u_x2APIC : 1; // bit 21
-			(cpuid.uMOVBE ? '+' : '-') << "MOVBE" << ' ' << //unsigned uMOVBE : 1; // bit 22
-			(cpuid.uPOPCNT ? '+' : '-') << "POPCNT" << ' ' << //unsigned uPOPCNT : 1; // bit 23
-			(cpuid.uTSC_Deadline ? '+' : '-') << "TSC-Deadline" << ' ' << //unsigned uTSC_Deadline : 1; // bit 24
-			(cpuid.uAES ? '+' : '-') << "AES" << ' ' << //unsigned uAES : 1; // bit 25
-			(cpuid.uXSAVE ? '+' : '-') << "XSAVE" << ' ' << //unsigned uXSAVE : 1; // bit 26
-			(cpuid.uOSXSAVE ? '+' : '-') << "OSXSAVE" << ' ' << //unsigned uOSXSAVE : 1; // bit 27
-			(cpuid.uAVX ? '+' : '-') << "AVX" << ' ' << //unsigned uAVX : 1; // bit 28
-			(cpuid.uF16C ? '+' : '-') << "F16C" << ' ' << //unsigned uF16C : 1; // bit 29
-			(cpuid.uRDRAND ? '+' : '-') << "RDRAND" << ' ' << //unsigned uRDRAND : 1; // bit 30
+			(cpuid.uSSE4_1 ? " +SSE4.1" : " -SSE4.1") << //unsigned uSSE4_1 : 1; // bit 19
+			(cpuid.uSSE4_2 ? " +SSE4.2" : " -SSE4.2") << //unsigned uSSE4_2 : 1; // bit 20
+			(cpuid.u_x2APIC ? " +x2APIC" : " -x2APIC") << //unsigned u_x2APIC : 1; // bit 21
+			(cpuid.uMOVBE ? " +MOVBE" : " -MOVBE") << //unsigned uMOVBE : 1; // bit 22
+			(cpuid.uPOPCNT ? " +POPCNT" : " -POPCNT") << //unsigned uPOPCNT : 1; // bit 23
+			(cpuid.uTSC_Deadline ? " +TSC-Deadline" : " -TSC-Deadline") << //unsigned uTSC_Deadline : 1; // bit 24
+			(cpuid.uAES ? " +AES" : " -AES") << //unsigned uAES : 1; // bit 25
+			(cpuid.uXSAVE ? " +XSAVE" : " -XSAVE") << //unsigned uXSAVE : 1; // bit 26
+			(cpuid.uOSXSAVE ? " +OSXSAVE" : " -OSXSAVE") << //unsigned uOSXSAVE : 1; // bit 27
+			(cpuid.uAVX ? " +AVX" : " -AVX") << //unsigned uAVX : 1; // bit 28
+			(cpuid.uF16C ? " +F16C" : " -F16C") << //unsigned uF16C : 1; // bit 29
+			(cpuid.uRDRAND ? " +RDRAND" : " -RDRAND") << //unsigned uRDRAND : 1; // bit 30
 			//unsigned : 1;
-			(cpuid.uFPU ? '+' : '-') << "FPU" << ' ' << //unsigned uFPU : 1; // bit 0
-			(cpuid.uVME ? '+' : '-') << "VME" << ' ' << //unsigned uVME : 1; // bit 1: Virtual 8086 Mode Enhancements
-			(cpuid.uDE ? '+' : '-') << "DE" << ' ' << //unsigned uDE : 1; // bit 2: Debugging Extensions
-			(cpuid.uPSE ? '+' : '-') << "PSE" << ' ' << //unsigned uPSE : 1; // bit 3: Page Size Extension
-			(cpuid.uTSC ? '+' : '-') << "TSC" << ' ' << //unsigned uTSC : 1; // bit 4
-			(cpuid.uMSR ? '+' : '-') << "MSR" << ' ' << //unsigned uMSR : 1; // bit 5
-			(cpuid.uPAE ? '+' : '-') << "PAE" << ' ' << //unsigned uPAE : 1; // bit 6
-			(cpuid.uMCE ? '+' : '-') << "MCE" << ' ' << //unsigned uMCE : 1; // bit 7: Machine Check Exception
-			(cpuid.uCX8 ? '+' : '-') << "CX8" << ' ' << //unsigned uCX8 : 1; // bit 8: CMPXCHG8B Instruction
-			(cpuid.uAPIC ? '+' : '-') << "APIC" << ' ' << //unsigned uAPIC : 1; // bit 9
+			(cpuid.uFPU ? " +FPU" : " -FPU") << //unsigned uFPU : 1; // bit 0
+			(cpuid.uVME ? " +VME" : " -VME") << //unsigned uVME : 1; // bit 1: Virtual 8086 Mode Enhancements
+			(cpuid.uDE ? " +DE" : " -DE") << //unsigned uDE : 1; // bit 2: Debugging Extensions
+			(cpuid.uPSE ? " +PSE" : " -PSE") << //unsigned uPSE : 1; // bit 3: Page Size Extension
+			(cpuid.uTSC ? " +TSC" : " -TSC") << //unsigned uTSC : 1; // bit 4
+			(cpuid.uMSR ? " +MSR" : " -MSR") << //unsigned uMSR : 1; // bit 5
+			(cpuid.uPAE ? " +PAE" : " -PAE") << //unsigned uPAE : 1; // bit 6
+			(cpuid.uMCE ? " +MCE" : " -MCE") << //unsigned uMCE : 1; // bit 7: Machine Check Exception
+			(cpuid.uCX8 ? " +CX8" : " -CX8") << //unsigned uCX8 : 1; // bit 8: CMPXCHG8B Instruction
+			(cpuid.uAPIC ? " +APIC" : " -APIC") << //unsigned uAPIC : 1; // bit 9
 			//unsigned : 1; // bit 10
-			(cpuid.uSEP ? '+' : '-') << "SEP" << ' ' << //unsigned uSEP : 1; // bit 11: SYSENTER and SYSEXIT Instructions
-			(cpuid.uMTRR ? '+' : '-') << "MTRR" << ' ' << //unsigned uMTRR : 1; // bit 12
-			(cpuid.uPGE ? '+' : '-') << "PGE" << ' ' << //unsigned uPGE : 1; // bit 13: Page Global Bit
-			(cpuid.uMCA ? '+' : '-') << "MCA" << ' ' << //unsigned uMCA : 1; // bit 14 Machine Check Architecture
-			(cpuid.uCMOV ? '+' : '-') << "CMOV" << ' ' << //unsigned uCMOV : 1; // bit 15
-			(cpuid.uPAT ? '+' : '-') << "PAT" << ' ' << //unsigned uPAT : 1; // bit 16: Page Attribute Table
-			(cpuid.uPSE36 ? '+' : '-') << "PSE36" << ' ' << //unsigned uPSE36 : 1; // bit 17: 36-Bit Page Size Extension
-			(cpuid.uPSN ? '+' : '-') << "PSN" << ' ' << //unsigned uPSN : 1; // bit 18: Processor Serial Number
-			(cpuid.uCLFSH ? '+' : '-') << "CLFSH" << ' ' << //unsigned uCLFSH : 1; // bit 19
+			(cpuid.uSEP ? " +SEP" : " -SEP") << //unsigned uSEP : 1; // bit 11: SYSENTER and SYSEXIT Instructions
+			(cpuid.uMTRR ? " +MTRR" : " -MTRR") << //unsigned uMTRR : 1; // bit 12
+			(cpuid.uPGE ? " +PGE" : " -PGE") << //unsigned uPGE : 1; // bit 13: Page Global Bit
+			(cpuid.uMCA ? " +MCA" : " -MCA") << //unsigned uMCA : 1; // bit 14 Machine Check Architecture
+			(cpuid.uCMOV ? " +CMOV" : " -CMOV") << //unsigned uCMOV : 1; // bit 15
+			(cpuid.uPAT ? " +PAT" : " -PAT") << //unsigned uPAT : 1; // bit 16: Page Attribute Table
+			(cpuid.uPSE36 ? " +PSE36" : " -PSE36") << //unsigned uPSE36 : 1; // bit 17: 36-Bit Page Size Extension
+			(cpuid.uPSN ? " +PSN" : " -PSN") << //unsigned uPSN : 1; // bit 18: Processor Serial Number
+			(cpuid.uCLFSH ? " +CLFSH" : " -CLFSH") << //unsigned uCLFSH : 1; // bit 19
 			//unsigned : 1; // bit 20
-			(cpuid.uDS ? '+' : '-') << "DS" << ' ' << //unsigned uDS : 1; // bit 21: Debug Store
-			(cpuid.uACPI ? '+' : '-') << "ACPI" << ' ' << //unsigned uACPI : 1; // bit 22: Thermal Monitor and Software Controlled Clock Facilities
-			(cpuid.uMMX ? '+' : '-') << "MMX" << ' ' << //unsigned uMMX : 1; // bit 23
-			(cpuid.uFXSR ? '+' : '-') << "FXSR" << ' ' << //unsigned uFXSR : 1; // bit 24
-			(cpuid.uSSE ? '+' : '-') << "SSE" << ' ' << //unsigned uSSE : 1; // bit 25
-			(cpuid.uSSE2 ? '+' : '-') << "SSE2" << ' ' << //unsigned uSSE2 : 1; // bit 26
-			(cpuid.uSS ? '+' : '-') << "SS" << ' ' << //unsigned uSS : 1; // bit 27: Self Snoop
-			(cpuid.uHTT ? '+' : '-') << "HTT" << ' ' << //unsigned uHTT : 1; // bit 28: Max APIC IDs reserved field is Valid
-			(cpuid.uTM ? '+' : '-') << "TM" << ' ' << //unsigned uTM : 1; // bit 29: Thermal Monitor
+			(cpuid.uDS ? " +DS" : " -DS") << //unsigned uDS : 1; // bit 21: Debug Store
+			(cpuid.uACPI ? " +ACPI" : " -ACPI") << //unsigned uACPI : 1; // bit 22: Thermal Monitor and Software Controlled Clock Facilities
+			(cpuid.uMMX ? " +MMX" : " -MMX") << //unsigned uMMX : 1; // bit 23
+			(cpuid.uFXSR ? " +FXSR" : " -FXSR") << //unsigned uFXSR : 1; // bit 24
+			(cpuid.uSSE ? " +SSE" : " -SSE") << //unsigned uSSE : 1; // bit 25
+			(cpuid.uSSE2 ? " +SSE2" : " -SSE2") << //unsigned uSSE2 : 1; // bit 26
+			(cpuid.uSS ? " +SS" : " -SS") << //unsigned uSS : 1; // bit 27: Self Snoop
+			(cpuid.uHTT ? " +HTT" : " -HTT") << //unsigned uHTT : 1; // bit 28: Max APIC IDs reserved field is Valid
+			(cpuid.uTM ? " +TM" : " -TM") << //unsigned uTM : 1; // bit 29: Thermal Monitor
 			//unsigned : 1; // bit 30
-			(cpuid.uPBE ? '+' : '-') << "PBE" << ' ';//unsigned uPBE : 1; // bit 31: Pending Break Enable
+			(cpuid.uPBE ? " +PBE" : " -PBE");//unsigned uPBE : 1; // bit 31: Pending Break Enable
 	}
 	template <int nECX> struct cpuid_info_t<0x04, nECX>
 	{
@@ -267,26 +267,26 @@ namespace jrmwng
 		case cpuid.NO_MORE_CACHES:
 			return os;
 		case cpuid.DATA_CACHE:
-			os << "D-Cache" << ' ';
+			os << " D-Cache";
 			break;
 		case cpuid.INSTRUCTION_CACHE:
-			os << "I-Cache" << ' ';
+			os << " I-Cache";
 			break;
 		case cpuid.UNIFIED_CACHE:
-			os << "U-Cache" << ' ';
+			os << " U-Cache";
 			break;
 		}
 		return os <<
 			'L' << (cpuid.uCacheLevel) << ' ' <<
-			std::setw(2) << (cpuid.uMaximumNumberOfAddressableIDsForLogicalProcessors + 1) << "processor(s)" << ' ' <<
-			std::setw(1) << (cpuid.uMaximumNumberOfAddressableIDsForProcessorCores + 1) << "core(s)" << ' ' <<
-			std::setw(2) << (cpuid.uWaysOfAssociativity + 1) << "way(s)" << ' ' <<
+			std::setw(2) << (cpuid.uMaximumNumberOfAddressableIDsForLogicalProcessors ? " +processor(s)" : " -processor(s)") <<
+			std::setw(1) << (cpuid.uMaximumNumberOfAddressableIDsForProcessorCores ? " +core(s)" : " -core(s)") <<
+			std::setw(2) << (cpuid.uWaysOfAssociativity ? " +way(s)" : " -way(s)") <<
 			'*' << ' ' <<
-			std::setw(1) << (cpuid.uPhysicalLinePartitions + 1) << "partition(s)" << ' ' <<
+			std::setw(1) << (cpuid.uPhysicalLinePartitions ? " +partition(s)" : " -partition(s)") <<
 			'*' << ' ' <<
-			std::setw(2) << (cpuid.uSystemCoherencyLineSize + 1) << "B" << ' ' <<
+			std::setw(2) << (cpuid.uSystemCoherencyLineSize ? " +B" : " -B") <<
 			'*' << ' ' <<
-			std::setw(4) << (cpuid.uNumberOfSets + 1) << "set(s)" << ' ';
+			std::setw(4) << (cpuid.uNumberOfSets ? " +set(s)" : " -set(s)");
 	}
 	template <> struct cpuid_info_t<0x05>
 	{
@@ -312,18 +312,18 @@ namespace jrmwng
 	};
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x05> const & cpuid)
 	{
-		return os <<
-			'[' << (cpuid.uSmallestLineSizeMONITOR) << 'B' << ',' << (cpuid.uLargestLineSizeMONITOR) << 'B' << ']' << ' ' <<
-			(cpuid.uMWAIT_Extension ? '+' : '-') << "MWAIT" << ' ' <<
-			(cpuid.uInterruptsAsBreakEvent ? '+' : '-') << "InterruptsAsBreakEvent" << ' ' <<
-			"C0/" << (cpuid.uNumberOfC0) << ' ' <<
-			"C1/" << (cpuid.uNumberOfC1) << ' ' <<
-			"C2/" << (cpuid.uNumberOfC2) << ' ' <<
-			"C3/" << (cpuid.uNumberOfC3) << ' ' <<
-			"C4/" << (cpuid.uNumberOfC4) << ' ' <<
-			"C5/" << (cpuid.uNumberOfC5) << ' ' <<
-			"C6/" << (cpuid.uNumberOfC6) << ' ' <<
-			"C7/" << (cpuid.uNumberOfC7) << ' ';
+		return os
+			<< " [" << (cpuid.uSmallestLineSizeMONITOR) << "B," << (cpuid.uLargestLineSizeMONITOR) << "B]"
+			<< (cpuid.uMWAIT_Extension ? " +MWAIT" : " -MWAIT")
+			<< (cpuid.uInterruptsAsBreakEvent ? " +InterruptsAsBreakEvent" : " -InterruptsAsBreakEvent")
+			<< ' ' << "C0/" << (cpuid.uNumberOfC0)
+			<< ' ' << "C1/" << (cpuid.uNumberOfC1)
+			<< ' ' << "C2/" << (cpuid.uNumberOfC2)
+			<< ' ' << "C3/" << (cpuid.uNumberOfC3)
+			<< ' ' << "C4/" << (cpuid.uNumberOfC4)
+			<< ' ' << "C5/" << (cpuid.uNumberOfC5)
+			<< ' ' << "C6/" << (cpuid.uNumberOfC6)
+			<< ' ' << "C7/"  << (cpuid.uNumberOfC7);
 	}
 	template <> struct cpuid_info_t<0x06>
 	{
@@ -357,15 +357,15 @@ namespace jrmwng
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x06> const & cpuid)
 	{
 		return os <<
-			(cpuid.uDigitalThermalSensor ? '+' : '-') << "ThermalSensor" << ' ' <<
-			(cpuid.uIntelTurboBoostTechnology ? '+' : '-') << "TurboBoost" << ' ' <<
-			(cpuid.uARAT ? '+' : '-') << "ARAT" << ' ' <<
-			(cpuid.uPLN ? '+' : '-') << "PLN" << ' ' <<
-			(cpuid.uECMD ? '+' : '-') << "ECMD" << ' ' <<
-			(cpuid.uPTM ? '+' : '-') << "PTM" << ' ' <<
-			(cpuid.uHWP ? '+' : '-') << "HWP" << ' ' <<
-			(cpuid.uHDC ? '+' : '-') << "HDC" << ' ' <<
-			(cpuid.uSETBH ? '+' : '-') << "SETBH" << ' ';
+			(cpuid.uDigitalThermalSensor ? " +ThermalSensor" : " -ThermalSensor") <<
+			(cpuid.uIntelTurboBoostTechnology ? " +TurboBoost" : " -TurboBoost") <<
+			(cpuid.uARAT ? " +ARAT" : " -ARAT") <<
+			(cpuid.uPLN ? " +PLN" : " -PLN") <<
+			(cpuid.uECMD ? " +ECMD" : " -ECMD") <<
+			(cpuid.uPTM ? " +PTM" : " -PTM") <<
+			(cpuid.uHWP ? " +HWP" : " -HWP") <<
+			(cpuid.uHDC ? " +HDC" : " -HDC") <<
+			(cpuid.uSETBH ? " +SETBH" : " -SETBH");
 	}
 	template <> struct cpuid_info_t<0x07>
 	{
@@ -422,39 +422,39 @@ namespace jrmwng
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x07> const & cpuid)
 	{
 		return os <<
-			(cpuid.uFSGSBASE ? '+' : '-') << "FSGSBASE" << ' ' <<
-			(cpuid.uIntelSGX ? '+' : '-') << "SGX" << ' ' <<
-			(cpuid.uBMI1 ? '+' : '-') << "BMI1" << ' ' <<
-			(cpuid.uHLE ? '+' : '-') << "HLE" << ' ' <<
-			(cpuid.uAVX2 ? '+' : '-') << "AVX2" << ' ' <<
-			(cpuid.uSMEP ? '+' : '-') << "SMEP" << ' ' <<
-			(cpuid.uBMI2 ? '+' : '-') << "BMI2" << ' ' <<
-			(cpuid.uFastStringOperation ? '+' : '-') << "Fast-String" << ' ' <<
-			(cpuid.uINVPCID ? '+' : '-') << "INVPCID" << ' ' <<
-			(cpuid.uRTM ? '+' : '-') << "RTM" << ' ' <<
-			(cpuid.uPQM ? '+' : '-') << "PQM" << ' ' <<
-			(cpuid.uIntelMPX ? '+' : '-') << "MPX" << ' ' <<
-			(cpuid.uPQE ? '+' : '-') << "PQE" << ' ' <<
-			(cpuid.uAVX512F ? '+' : '-') << "AVX512F" << ' ' << // bit 16: avx-512 foundation
-			(cpuid.uAVX512DQ ? '+' : '-') << "AVX512DQ" << ' ' << // bit 17: avx-512 doubleword and quadword instructions
-			(cpuid.uRDSEED ? '+' : '-') << "RDSEED" << ' ' <<
-			(cpuid.uADX ? '+' : '-') << "ADX" << ' ' <<
-			(cpuid.uSMAP ? '+' : '-') << "SMAP" << ' ' <<
-			(cpuid.uAVX512IFMA ? '+' : '-') << "AVX512IFMA" << ' ' << // bit 21
-			(cpuid.uPCOMMIT ? '+' : '-') << "PCOMMIT" << ' ' <<  // bit 22
-			(cpuid.uCLFLUSHOPT ? '+' : '-') << "CLFLUSHOPT" << ' ' <<
-			(cpuid.uCLWB ? '+' : '-') << "CLWB" << ' ' <<
-			(cpuid.uIntelProcessorTrace ? '+' : '-') << "PT" << ' ' <<
-			(cpuid.uAVX512PF ? '+' : '-') << "AVX512PF" << ' ' <<
-			(cpuid.uAVX512ER ? '+' : '-') << "AVX512ER" << ' ' <<
-			(cpuid.uAVX512CD ? '+' : '-') << "AVX512CD" << ' ' <<
-			(cpuid.uSHA ? '+' : '-') << "SHA" << ' ' << // bit 29
-			(cpuid.uAVX512BW ? '+' : '-') << "AVX512BW" << ' ' <<
-			(cpuid.uAVX512VL ? '+' : '-') << "AVX512VL" << ' ' <<
-			(cpuid.uPREFTEHCHWT1 ? '+' : '-') << "PREFTEHCHWT1" << ' ' <<
-			(cpuid.uAVX512VBMI ? '+' : '-') << "AVX512VBMI" << ' ' <<
-			(cpuid.uPKU ? '+' : '-') << "PKU" << ' ' <<
-			(cpuid.uOSPKE ? '+' : '-') << "OSPKE" << ' ';
+			(cpuid.uFSGSBASE ? " +FSGSBASE " : " -FSGSBASE ") <<
+			(cpuid.uIntelSGX ? " +SGX " : " -SGX ") <<
+			(cpuid.uBMI1 ? " +BMI1 " : " -BMI1 ") <<
+			(cpuid.uHLE ? " +HLE " : " -HLE ") <<
+			(cpuid.uAVX2 ? " +AVX2 " : " -AVX2 ") <<
+			(cpuid.uSMEP ? " +SMEP " : " -SMEP ") <<
+			(cpuid.uBMI2 ? " +BMI2 " : " -BMI2 ") <<
+			(cpuid.uFastStringOperation ? " +FastString " : " -FastString ") <<
+			(cpuid.uINVPCID ? " +INVPCID " : " -INVPCID ") <<
+			(cpuid.uRTM ? " +RTM " : " -RTM ") <<
+			(cpuid.uPQM ? " +PQM " : " -PQM ") <<
+			(cpuid.uIntelMPX ? " +MPX " : " -MPX ") <<
+			(cpuid.uPQE ? " +PQE " : " -PQE ") <<
+			(cpuid.uAVX512F ? " +AVX512F " : " -AVX512F ") << // bit 16: avx-512 foundation
+			(cpuid.uAVX512DQ ? " +AVX512DQ " : " -AVX512DQ ") << // bit 17: avx-512 doubleword and quadword instructions
+			(cpuid.uRDSEED ? " +RDSEED " : " -RDSEED ") <<
+			(cpuid.uADX ? " +ADX " : " -ADX ") <<
+			(cpuid.uSMAP ? " +SMAP " : " -SMAP ") <<
+			(cpuid.uAVX512IFMA ? " +AVX512IFMA " : " -AVX512IFMA ") << // bit 21
+			(cpuid.uPCOMMIT ? " +PCOMMIT " : " -PCOMMIT ") <<  // bit 22
+			(cpuid.uCLFLUSHOPT ? " +CLFLUSHOPT " : " -CLFLUSHOPT ") <<
+			(cpuid.uCLWB ? " +CLWB " : " -CLWB ") <<
+			(cpuid.uIntelProcessorTrace ? " +PT " : " -PT ") <<
+			(cpuid.uAVX512PF ? " +AVX512PF " : " -AVX512PF ") <<
+			(cpuid.uAVX512ER ? " +AVX512ER " : " -AVX512ER ") <<
+			(cpuid.uAVX512CD ? " +AVX512CD " : " -AVX512CD ") <<
+			(cpuid.uSHA ? " +SHA " : " -SHA ") << // bit 29
+			(cpuid.uAVX512BW ? " +AVX512BW " : " -AVX512BW ") <<
+			(cpuid.uAVX512VL ? " +AVX512VL " : " -AVX512VL ") <<
+			(cpuid.uPREFTEHCHWT1 ? " +PREFTEHCHWT1 " : " -PREFTEHCHWT1 ") <<
+			(cpuid.uAVX512VBMI ? " +AVX512VBMI " : " -AVX512VBMI ") <<
+			(cpuid.uPKU ? " +PKU " : " -PKU ") <<
+			(cpuid.uOSPKE ? " +OSPKE " : " -OSPKE ");
 	}
 	template <> struct cpuid_info_t<0x09>
 	{
@@ -492,10 +492,10 @@ namespace jrmwng
 	};
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0A> const & cpuid)
 	{
-		os << (cpuid.uNumOfGP) << '*' << (cpuid.uBitWidthOfGP) << 'b' << ' ';
+		os << ' ' << (cpuid.uNumOfGP) << '*' << (cpuid.uBitWidthOfGP) << 'b';
 		if (cpuid.uVersionID > 1)
 		{
-			os << (cpuid.uNumOfFixedFunctionPerformanceCounters) << '*' << (cpuid.uBitWidthOfFixedFunctionPerformanceCounters) << 'b' << ' ';
+			os << ' ' << (cpuid.uNumOfFixedFunctionPerformanceCounters) << '*' << (cpuid.uBitWidthOfFixedFunctionPerformanceCounters) << 'b' << ' ';
 		}
 		return os;
 	}
@@ -528,21 +528,21 @@ namespace jrmwng
 		switch (cpuid.uLevelType)
 		{
 		case 0:
-			os << "Invalid" << ' ';
+			os << " Invalid";
 			return os;
 		case 1:
-			os << std::setw(8) << "SMT" << ' ';
+			os << std::setw(8) << " SMT";
 			break;
 		case 2:
-			os << std::setw(8) << "Core" << ' ';
+			os << std::setw(8) << " Core";
 			break;
 		default:
-			os << std::setw(8) << "Reserved" << ' ';
+			os << std::setw(8) << " Reserved";
 			break;
 		}
-		os << "x2APIC-ID=" << cpuid.u_x2APIC_ID << ' ';
-		os << "Topology-ID=" << (cpuid.u_x2APIC_ID >> cpuid.uNumOfBitsToShift) << ' ';
-		os << "Logical-Processor=" << (cpuid.uNumOfLogicalProcessors) << ' ';
+		os << " x2APIC-ID="  << cpuid.u_x2APIC_ID;
+		os << " Topology-ID="  << (cpuid.u_x2APIC_ID >> cpuid.uNumOfBitsToShift);
+		os << " Logical-Processor="  << (cpuid.uNumOfLogicalProcessors);
 		return os;
 	}
 	template <> struct cpuid_info_t<0x0D>
@@ -576,18 +576,18 @@ namespace jrmwng
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D> const & cpuid)
 	{
 		return os <<
-			(cpuid.uStateX87 ? '+' : '-') << "x87" << ' ' <<
-			(cpuid.uStateSSE ? '+' : '-') << "SSE" << ' ' <<
-			(cpuid.uStateAVX ? '+' : '-') << "AVX" << ' ' <<
-			(cpuid.uStateBNDREGS ? '+' : '-') << "BNDREGS" << ' ' <<
-			(cpuid.uStateBNDCSR ? '+' : '-') << "BNDCSR" << ' ' <<
-			(cpuid.uStateOpmask ? '+' : '-') << "Opmask" << ' ' <<
-			(cpuid.uStateZMM_Hi256 ? '+' : '-') << "ZMM_Hi256" << ' ' <<
-			(cpuid.uStateHi16_ZMM ? '+' : '-') << "Hi16_ZMM" << ' ' <<
-			(cpuid.uStatePT ? '+' : '-') << "PT" << ' ' <<
-			(cpuid.uStatePKRU ? '+' : '-') << "PKRU" << ' ' <<
-			(cpuid.uSizeXCR0) << 'B' << ' ' <<
-			(cpuid.uSize) << 'B' << ' ';
+			(cpuid.uStateX87 ? " +x87" : " -x87") <<
+			(cpuid.uStateSSE ? " +SSE" : " -SSE") <<
+			(cpuid.uStateAVX ? " +AVX" : " -AVX") <<
+			(cpuid.uStateBNDREGS ? " +BNDREGS" : " -BNDREGS") <<
+			(cpuid.uStateBNDCSR ? " +BNDCSR" : " -BNDCSR") <<
+			(cpuid.uStateOpmask ? " +Opmask" : " -Opmask") <<
+			(cpuid.uStateZMM_Hi256 ? " +ZMM_Hi256" : " -ZMM_Hi256") <<
+			(cpuid.uStateHi16_ZMM ? " +Hi16_ZMM" : " -Hi16_ZMM") <<
+			(cpuid.uStatePT ? " +PT" : " -PT") <<
+			(cpuid.uStatePKRU ? " +PKRU" : " -PKRU") <<
+			' ' << (cpuid.uSizeXCR0) << 'B' <<
+			' ' << (cpuid.uSize) << 'B';
 	}
 	template <> struct cpuid_info_t<0x0D, 1>
 	{
@@ -611,11 +611,11 @@ namespace jrmwng
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 1> const & cpuid)
 	{
 		return os <<
-			(cpuid.uXSAVEOPT ? '+' : '-') << "XSAVEOPT" << ' ' <<
-			(cpuid.uCompactionExtensions ? '+' : '-') << "Compaction-Extensions" << ' ' <<
-			(cpuid.uXGETBV ? '+' : '-') << "XGETBV" << ' ' <<
-			(cpuid.uXSAVES_IA32_XSS ? '+' : '-') << "XSAVES-IA32_XSS" << ' ' <<
-			(cpuid.uSize) << 'B' << ' ';
+			(cpuid.uXSAVEOPT ? " +XSAVEOPT" : " -XSAVEOPT") <<
+			(cpuid.uCompactionExtensions ? " +Compaction-Extensions" : " -Compaction-Extensions") <<
+			(cpuid.uXGETBV ? " +XGETBV" : " -XGETBV") <<
+			(cpuid.uXSAVES_IA32_XSS ? " +XSAVES-IA32_XSS" : " -XSAVES-IA32_XSS") <<
+			' ' << (cpuid.uSize) << 'B';
 	}
 	template <int nECX> struct cpuid_info_t<0x0D, nECX> // AVX state, BNGREG state, BNDCSR state, Opmask state, ZMM_Hi256 state, Hi16_ZMM state, PT state, PKRU state
 	{
@@ -635,14 +635,14 @@ namespace jrmwng
 			return static_cast<unsigned>(nECX) <= uMaxECX;
 		}
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 2> const & cpuid) { return os << "AVX      " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 3> const & cpuid) { return os << "BNGREG   " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 4> const & cpuid) { return os << "BNGCSR   " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 5> const & cpuid) { return os << "Opmask   " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 6> const & cpuid) { return os << "ZMM_Hi256" << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 7> const & cpuid) { return os << "Hi16_ZMM " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 8> const & cpuid) { return os << "PT       " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 9> const & cpuid) { return os << "PKRU     " << std::setw(3) << cpuid.uSize << 'B' << " @ " << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 2> const & cpuid) { return os <<" AVX      "  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 3> const & cpuid) { return os <<" BNGREG   "  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 4> const & cpuid) { return os <<" BNGCSR   "  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 5> const & cpuid) { return os <<" Opmask   "  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 6> const & cpuid) { return os <<" ZMM_Hi256"  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 7> const & cpuid) { return os <<" Hi16_ZMM "  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 8> const & cpuid) { return os <<" PT       "  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 9> const & cpuid) { return os <<" PKRU     "  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
 
 	template <> struct cpuid_info_t<0x0F>
 	{
@@ -740,8 +740,8 @@ namespace jrmwng
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x12> const & cpuid)
 	{
 		return os <<
-			(cpuid.uSGX1 ? '+' : '-') << "SGX1" << ' ' <<
-			(cpuid.uSGX2 ? '+' : '-') << "SGX2" << ' ';
+			(cpuid.uSGX1 ? " +SGX1" : " -SGX1") <<
+			(cpuid.uSGX2 ? " +SGX2" : " -SGX2");
 	}
 	template <> struct cpuid_info_t<0x14>
 	{
@@ -800,8 +800,7 @@ namespace jrmwng
 	};
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x15> const & cpuid)
 	{
-		return os <<
-			cpuid.uTSC << '/' << cpuid.uCoreCrystalClock << ' ';
+		return os << ' ' << cpuid.uTSC << '/' << cpuid.uCoreCrystalClock;
 	}
 	template <> struct cpuid_info_t<0x16>
 	{
@@ -819,10 +818,10 @@ namespace jrmwng
 	};
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x16> const & cpuid)
 	{
-		return os <<
-			cpuid.uProcessorBaseFrequencyMHz << "MHz" << ' ' <<
-			cpuid.uMaximumFrequencyMHz << "MHz" << ' ' <<
-			cpuid.uBusFrequencyMHz << "MHz" << ' ';
+		return os
+			<< ' ' << cpuid.uProcessorBaseFrequencyMHz << "MHz"
+			<< ' ' << cpuid.uMaximumFrequencyMHz << "MHz"
+			<< ' ' << cpuid.uBusFrequencyMHz << "MHz";
 	}
 	template <> struct cpuid_info_t<0x17>
 	{
@@ -873,9 +872,9 @@ namespace jrmwng
 			return 3 <= uMaxECX;
 		}
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x17, 1> const & cpuid) { return os.write(cpuid.ac, 16); }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x17, 2> const & cpuid) { return os.write(cpuid.ac, 16); }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x17, 3> const & cpuid) { return os.write(cpuid.ac, 16); }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x17, 1> const & cpuid) { return (os << ' ').write(cpuid.ac, 16); }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x17, 2> const & cpuid) { return (os << ' ').write(cpuid.ac, 16); }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x17, 3> const & cpuid) { return (os << ' ').write(cpuid.ac, 16); }
 
 	template <> struct cpuid_info_t<0x80000000>
 	{
@@ -921,11 +920,12 @@ namespace jrmwng
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000001> const & cpuid)
 	{
 		return os <<
-			(cpuid.uLZCNT ? '+' : '-') << "LZCNT" << ' ' <<
-			(cpuid.uPREFTEHCHW ? '+' : '-') << "PREFTEHCHW" << ' ' <<
-			(cpuid.u1GBytePages ? '+' : '-') << "1GBytePages" << ' ' <<
-			(cpuid.uRDTSCP ? '+' : '-') << "RDTSCP" << ' ' <<
-			(cpuid.uIntel64 ? '+' : '-') << "x64" << ' ';
+			(cpuid.uLZCNT ? " +LZCNT" : " -LZCNT") <<
+			(cpuid.uPREFTEHCHW ? " +PREFTEHCHW" : " -PREFTEHCHW") <<
+			(cpuid.uExecuteDiableBit ? " +ExecuteDisable" : " -ExecuteDisable") <<
+			(cpuid.u1GBytePages ? " +1GBytePages" : " -1GBytePages") <<
+			(cpuid.uRDTSCP ? " +RDTSCP" : " -RDTSCP") <<
+			(cpuid.uIntel64 ? " +x64" : " -x64");
 	}
 	template <> struct cpuid_info_t<0x80000002>
 	{
@@ -944,9 +944,9 @@ namespace jrmwng
 	{
 		char ac[16];
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000002> const & cpuid) { return os.write(cpuid.ac, 16); }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000003> const & cpuid) { return os.write(cpuid.ac, 16); }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000004> const & cpuid) { return os.write(cpuid.ac, 16); }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000002> const & cpuid) { return (os << ' ').write(cpuid.ac, 16); }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000003> const & cpuid) { return (os << ' ').write(cpuid.ac, 16); }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000004> const & cpuid) { return (os << ' ').write(cpuid.ac, 16); }
 	template <> struct cpuid_info_t<0x80000006>
 	{
 		// eax
@@ -963,32 +963,32 @@ namespace jrmwng
 	};
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000006> const & cpuid)
 	{
-		os << (cpuid.uCacheLineSize) << "B" << ' ';
+		os << (cpuid.uCacheLineSize ? " +B " : " -B ");
 		switch (cpuid.uL2Associativity)
 		{
 		case 0:
-			os << "Disabled" << ' ';
+			os << " Disabled ";
 			break;
 		case 1:
-			os << "DirectMapped" << ' ';
+			os << " DirectMapped ";
 			break;
 		case 2:
-			os << "2-way" << ' ';
+			os << " 2-way ";
 			break;
 		case 4:
-			os << "4-way" << ' ';
+			os << " 4-way ";
 			break;
 		case 6:
-			os << "8-way" << ' ';
+			os << " 8-way ";
 			break;
 		case 8:
-			os << "16-way" << ' ';
+			os << " 16-way ";
 			break;
 		case 0xF:
-			os << "FullyAssociative" << ' ';
+			os << " FullyAssociative ";
 			break;
 		}
-		return os << (cpuid.uCacheSize1K) << "KB" << ' ';
+		return os << (cpuid.uCacheSize1K ? " +KB " : " -KB ");
 	}
 	template <> struct cpuid_info_t<0x80000007>
 	{
@@ -1006,7 +1006,7 @@ namespace jrmwng
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000007> const & cpuid)
 	{
 		return os <<
-			(cpuid.uInvariantTSC ? '+' : '-') << "InvariantTSC" << ' ';
+			(cpuid.uInvariantTSC ? " +InvariantTSC " : " -InvariantTSC ");
 	}
 	template <> struct cpuid_info_t<0x80000008>
 	{
@@ -1023,16 +1023,16 @@ namespace jrmwng
 	};
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000008> const & cpuid)
 	{
-		return os <<
-			(cpuid.uNumOfPhysicalAddressBits) << 'b' << ' ' <<
-			(cpuid.uNumOfLinearAddressBits) << 'b' << ' ';
+		return os
+			<< ' ' << (cpuid.uNumOfPhysicalAddressBits) << 'b'
+			<< ' ' << (cpuid.uNumOfLinearAddressBits) << 'b';
 	}
 
 	template <int nEAX, int nECX = 0>
 	struct cpuid_t
 		: cpuid_info_t<nEAX, nECX>
 	{
-		static_assert(sizeof(cpuid_info_t<nEAX, nECX>) == 16, "CPUID expects 4 32-bit integers");
+		static_assert(sizeof(cpuid_info_t<nEAX, nECX>) == 16,"CPUID expects 4 32-bit integers");
 
 		cpuid_t()
 		{
@@ -1051,13 +1051,12 @@ namespace jrmwng
 			}
 			int nMask = os.setf(std::ios_base::hex);
 			os.unsetf(std::ios_base::dec);
-			os <<
-				std::setw(8) << static_cast<unsigned>(nEAX) << ' ' <<
-				std::setw(3) << static_cast<unsigned>(nECX) << ' ' <<
-				std::setw(8) << reinterpret_cast<unsigned const*>(this)[0] << ' ' <<
-				std::setw(8) << reinterpret_cast<unsigned const*>(this)[1] << ' ' <<
-				std::setw(8) << reinterpret_cast<unsigned const*>(this)[2] << ' ' <<
-				std::setw(8) << reinterpret_cast<unsigned const*>(this)[3] << ' ';
+			os  <<        std::setw(8) << static_cast<unsigned>(nEAX)
+				<< ' ' << std::setw(3) << static_cast<unsigned>(nECX)
+				<< ' ' << std::setw(8) << reinterpret_cast<unsigned const*>(this)[0]
+				<< ' ' << std::setw(8) << reinterpret_cast<unsigned const*>(this)[1]
+				<< ' ' << std::setw(8) << reinterpret_cast<unsigned const*>(this)[2]
+				<< ' ' << std::setw(8) << reinterpret_cast<unsigned const*>(this)[3];
 			os.setf(nMask);
 			os <<
 				static_cast<cpuid_info_t<nEAX, nECX>const&>(*this) << std::endl;
