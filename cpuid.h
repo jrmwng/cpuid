@@ -635,14 +635,14 @@ namespace jrmwng
 			return static_cast<unsigned>(nECX) <= uMaxECX;
 		}
 	};
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 2> const & cpuid) { return os <<" AVX      "  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 3> const & cpuid) { return os <<" BNGREG   "  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 4> const & cpuid) { return os <<" BNGCSR   "  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 5> const & cpuid) { return os <<" Opmask   "  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 6> const & cpuid) { return os <<" ZMM_Hi256"  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 7> const & cpuid) { return os <<" Hi16_ZMM "  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 8> const & cpuid) { return os <<" PT       "  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
-	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 9> const & cpuid) { return os <<" PKRU     "  << std::setw(3) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 2> const & cpuid) { return os <<" AVX       "  << std::setw(4) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 3> const & cpuid) { return os <<" BNGREG    "  << std::setw(4) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 4> const & cpuid) { return os <<" BNGCSR    "  << std::setw(4) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 5> const & cpuid) { return os <<" Opmask    "  << std::setw(4) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 6> const & cpuid) { return os <<" ZMM_Hi256 "  << std::setw(4) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 7> const & cpuid) { return os <<" Hi16_ZMM  "  << std::setw(4) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 8> const & cpuid) { return os <<" PT        "  << std::setw(4) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0D, 9> const & cpuid) { return os <<" PKRU      "  << std::setw(4) << cpuid.uSize << 'B' <<" @ "  << std::setw(4) << cpuid.uOffset << 'B'; }
 
 	template <> struct cpuid_info_t<0x0F>
 	{
