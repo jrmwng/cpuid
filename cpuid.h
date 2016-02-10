@@ -281,12 +281,9 @@ namespace jrmwng
 			<< ' ' << std::setw(2) << (cpuid.uMaximumNumberOfAddressableIDsForLogicalProcessors + 1) << "processor(s)"
 			<< ' ' << std::setw(2) << (cpuid.uMaximumNumberOfAddressableIDsForProcessorCores + 1) << "core(s)"
 			<< ' ' << std::setw(2) << (cpuid.uWaysOfAssociativity + 1) << "way(s)"
-			<< " *"
-			<< ' ' << std::setw(1) << (cpuid.uPhysicalLinePartitions + 1) << "partition(s)"
-			<< " *"
-			<< ' ' << std::setw(2) << (cpuid.uSystemCoherencyLineSize + 1) << 'B'
-			<< " *"
-			<< ' ' << std::setw(5) << (cpuid.uNumberOfSets + 1) << "set(s)";
+			<< " * " << std::setw(1) << (cpuid.uPhysicalLinePartitions + 1) << "partition(s)"
+			<< " * " << std::setw(2) << (cpuid.uSystemCoherencyLineSize + 1) << 'B'
+			<< " * " << std::setw(5) << (cpuid.uNumberOfSets + 1) << "set(s)";
 	}
 	template <> struct cpuid_info_t<0x05>
 	{
@@ -423,16 +420,19 @@ namespace jrmwng
 	{
 		return os <<
 			(cpuid.uFSGSBASE ? " +FSGSBASE" : " -FSGSBASE") <<
+			(cpuid.uIA32_TSC_ADJUST ? " +IA32_TSC_ADJUST" : " -IA32_TSC_ADJUST") <<
 			(cpuid.uIntelSGX ? " +SGX" : " -SGX") <<
 			(cpuid.uBMI1 ? " +BMI1" : " -BMI1") <<
 			(cpuid.uHLE ? " +HLE" : " -HLE") <<
 			(cpuid.uAVX2 ? " +AVX2" : " -AVX2") <<
+			(cpuid.uFDP_EXCPTN_ONLY ? " +FDP_EXCPTN_ONLY" : " -FDP_EXCPTN_ONLY") <<
 			(cpuid.uSMEP ? " +SMEP" : " -SMEP") <<
 			(cpuid.uBMI2 ? " +BMI2" : " -BMI2") <<
 			(cpuid.uFastStringOperation ? " +FastString" : " -FastString") <<
 			(cpuid.uINVPCID ? " +INVPCID" : " -INVPCID") <<
 			(cpuid.uRTM ? " +RTM" : " -RTM") <<
 			(cpuid.uPQM ? " +PQM" : " -PQM") <<
+			(cpuid.uFCS_FDS ? " +SuppressFCS +SuppressFDS" : " -SuppressFCS -SuppressFDS") <<
 			(cpuid.uIntelMPX ? " +MPX" : " -MPX") <<
 			(cpuid.uPQE ? " +PQE" : " -PQE") <<
 			(cpuid.uAVX512F ? " +AVX512F" : " -AVX512F") << // bit 16: avx-512 foundation
@@ -492,7 +492,18 @@ namespace jrmwng
 	};
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x0A> const & cpuid)
 	{
-		os << ' ' << (cpuid.uNumOfGP) << '*' << (cpuid.uBitWidthOfGP) << 'b';
+		os
+			<< " VersionID=" << cpuid.uVersionID
+			<< ' ' << (cpuid.uNumOfGP) << '*' << (cpuid.uBitWidthOfGP) << 'b';
+
+		if (cpuid.uLengethOfEBX > 0) os << (cpuid.uCoreCycleEventUnavailable ? " -CoreCycleEvent" : " +CoreCycleEvent");
+		if (cpuid.uLengethOfEBX > 1) os << (cpuid.uInstructionRetiredEventUnavailable ? " -InstructionRetiredEvent" : " +InstructionRetiredEvent");
+		if (cpuid.uLengethOfEBX > 2) os << (cpuid.uReferenceCyclesEventUnavailable ? " -ReferenceCyclesEvent" : " +ReferenceCyclesEvent");
+		if (cpuid.uLengethOfEBX > 3) os << (cpuid.uLLC_ReferenceEventUnavailable ? " -LLC_ReferenceEvent" : " +LLC_ReferenceEvent");
+		if (cpuid.uLengethOfEBX > 4) os << (cpuid.uLLC_MissesEventUnavailable ? " -LLC_MissesEvent" : " +LLC_MissesEvent");
+		if (cpuid.uLengethOfEBX > 5) os << (cpuid.uBranchInstructionRetiredEventUnavailable ? " -BranchInstructionRetiredEvent" : " +BranchInstructionRetiredEvent");
+		if (cpuid.uLengethOfEBX > 6) os << (cpuid.uBranchMispredictRetiredEventUnavailable ? " -BranchMispredictRetiredEvent" : " +BranchMispredictRetiredEvent");
+
 		if (cpuid.uVersionID > 1)
 		{
 			os << ' ' << (cpuid.uNumOfFixedFunctionPerformanceCounters) << '*' << (cpuid.uBitWidthOfFixedFunctionPerformanceCounters) << 'b' << ' ';
@@ -612,9 +623,9 @@ namespace jrmwng
 	{
 		return os <<
 			(cpuid.uXSAVEOPT ? " +XSAVEOPT" : " -XSAVEOPT") <<
-			(cpuid.uCompactionExtensions ? " +Compaction-Extensions" : " -Compaction-Extensions") <<
+			(cpuid.uCompactionExtensions ? " +Compaction_Extensions" : " -Compaction_Extensions") <<
 			(cpuid.uXGETBV ? " +XGETBV" : " -XGETBV") <<
-			(cpuid.uXSAVES_IA32_XSS ? " +XSAVES-IA32_XSS" : " -XSAVES-IA32_XSS") <<
+			(cpuid.uXSAVES_IA32_XSS ? " +XSAVES_IA32_XSS" : " -XSAVES_IA32_XSS") <<
 			' ' << (cpuid.uSize) << 'B';
 	}
 	template <int nECX> struct cpuid_info_t<0x0D, nECX> // AVX state, BNGREG state, BNDCSR state, Opmask state, ZMM_Hi256 state, Hi16_ZMM state, PT state, PKRU state
@@ -800,7 +811,7 @@ namespace jrmwng
 	};
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x15> const & cpuid)
 	{
-		return os << ' ' << cpuid.uTSC << '/' << cpuid.uCoreCrystalClock;
+		return os << ' ' << cpuid.uTSC << "TSC / " << cpuid.uCoreCrystalClock << "CLK";
 	}
 	template <> struct cpuid_info_t<0x16>
 	{
@@ -819,9 +830,8 @@ namespace jrmwng
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x16> const & cpuid)
 	{
 		return os
-			<< ' ' << cpuid.uProcessorBaseFrequencyMHz << "MHz"
-			<< ' ' << cpuid.uMaximumFrequencyMHz << "MHz"
-			<< ' ' << cpuid.uBusFrequencyMHz << "MHz";
+			<< " [" << cpuid.uProcessorBaseFrequencyMHz << "MHz," << cpuid.uMaximumFrequencyMHz << "MHz]"
+			<< '@' << cpuid.uBusFrequencyMHz << "MHz";
 	}
 	template <> struct cpuid_info_t<0x17>
 	{
@@ -920,8 +930,10 @@ namespace jrmwng
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000001> const & cpuid)
 	{
 		return os <<
+			(cpuid.uLAHF_SAHF ? " +LAHF +SAHF" : " -LAHF -SAHF") <<
 			(cpuid.uLZCNT ? " +LZCNT" : " -LZCNT") <<
 			(cpuid.uPREFTEHCHW ? " +PREFTEHCHW" : " -PREFTEHCHW") <<
+			(cpuid.uSYSCALL_SYSRET_64bitMode ? " +SYSCALL@x64 +SYSRET@x64" : " -SYSCALL@x64 -SYSRET@x64") <<
 			(cpuid.uExecuteDiableBit ? " +ExecuteDisable" : " -ExecuteDisable") <<
 			(cpuid.u1GBytePages ? " +1GBytePages" : " -1GBytePages") <<
 			(cpuid.uRDTSCP ? " +RDTSCP" : " -RDTSCP") <<
@@ -956,7 +968,16 @@ namespace jrmwng
 		// ecx
 		unsigned uCacheLineSize : 8; // [bits 7:0]
 		unsigned : 4;
-		unsigned uL2Associativity : 4; // [bits 15:12]
+		enum
+		{
+			L2_DISABLED = 0,
+			L2_DIRECT_MAPPED = 1,
+			L2_2WAY = 2,
+			L2_4WAY = 4,
+			L2_8WAY = 6,
+			L2_16WAY = 8,
+			L2_FULLY_ASSOCIATIVE = 0xF,
+		} emL2Associativity: 4; // [bits 15:12]
 		unsigned uCacheSize1K : 16; // [bits 31:16]
 		// edx
 		unsigned : 32;
@@ -964,27 +985,27 @@ namespace jrmwng
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000006> const & cpuid)
 	{
 		os << ' ' << cpuid.uCacheLineSize << 'B';
-		switch (cpuid.uL2Associativity)
+		switch (cpuid.emL2Associativity)
 		{
-		case 0:
+		case cpuid.L2_DISABLED:
 			os << " Disabled";
 			break;
-		case 1:
+		case cpuid.L2_DIRECT_MAPPED:
 			os << " DirectMapped";
 			break;
-		case 2:
+		case cpuid.L2_2WAY:
 			os << " 2-way";
 			break;
-		case 4:
+		case cpuid.L2_4WAY:
 			os << " 4-way";
 			break;
-		case 6:
+		case cpuid.L2_8WAY:
 			os << " 8-way";
 			break;
-		case 8:
+		case cpuid.L2_16WAY:
 			os << " 16-way";
 			break;
-		case 0xF:
+		case cpuid.L2_FULLY_ASSOCIATIVE:
 			os << " FullyAssociative";
 			break;
 		}
