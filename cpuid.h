@@ -279,14 +279,14 @@ namespace jrmwng
 		return os
 			<< " L" << (cpuid.uCacheLevel)
 			<< ' ' << std::setw(2) << (cpuid.uMaximumNumberOfAddressableIDsForLogicalProcessors + 1) << "processor(s)"
-			<< ' ' << std::setw(1) << (cpuid.uMaximumNumberOfAddressableIDsForProcessorCores + 1) << "core(s)"
+			<< ' ' << std::setw(2) << (cpuid.uMaximumNumberOfAddressableIDsForProcessorCores + 1) << "core(s)"
 			<< ' ' << std::setw(2) << (cpuid.uWaysOfAssociativity + 1) << "way(s)"
 			<< " *"
 			<< ' ' << std::setw(1) << (cpuid.uPhysicalLinePartitions + 1) << "partition(s)"
 			<< " *"
 			<< ' ' << std::setw(2) << (cpuid.uSystemCoherencyLineSize + 1) << 'B'
 			<< " *"
-			<< ' ' << std::setw(4) << (cpuid.uNumberOfSets + 1) << "set(s)";
+			<< ' ' << std::setw(5) << (cpuid.uNumberOfSets + 1) << "set(s)";
 	}
 	template <> struct cpuid_info_t<0x05>
 	{
