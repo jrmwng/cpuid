@@ -422,39 +422,39 @@ namespace jrmwng
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x07> const & cpuid)
 	{
 		return os <<
-			(cpuid.uFSGSBASE ? " +FSGSBASE " : " -FSGSBASE ") <<
-			(cpuid.uIntelSGX ? " +SGX " : " -SGX ") <<
-			(cpuid.uBMI1 ? " +BMI1 " : " -BMI1 ") <<
-			(cpuid.uHLE ? " +HLE " : " -HLE ") <<
-			(cpuid.uAVX2 ? " +AVX2 " : " -AVX2 ") <<
-			(cpuid.uSMEP ? " +SMEP " : " -SMEP ") <<
-			(cpuid.uBMI2 ? " +BMI2 " : " -BMI2 ") <<
-			(cpuid.uFastStringOperation ? " +FastString " : " -FastString ") <<
-			(cpuid.uINVPCID ? " +INVPCID " : " -INVPCID ") <<
-			(cpuid.uRTM ? " +RTM " : " -RTM ") <<
-			(cpuid.uPQM ? " +PQM " : " -PQM ") <<
-			(cpuid.uIntelMPX ? " +MPX " : " -MPX ") <<
-			(cpuid.uPQE ? " +PQE " : " -PQE ") <<
-			(cpuid.uAVX512F ? " +AVX512F " : " -AVX512F ") << // bit 16: avx-512 foundation
-			(cpuid.uAVX512DQ ? " +AVX512DQ " : " -AVX512DQ ") << // bit 17: avx-512 doubleword and quadword instructions
-			(cpuid.uRDSEED ? " +RDSEED " : " -RDSEED ") <<
-			(cpuid.uADX ? " +ADX " : " -ADX ") <<
-			(cpuid.uSMAP ? " +SMAP " : " -SMAP ") <<
-			(cpuid.uAVX512IFMA ? " +AVX512IFMA " : " -AVX512IFMA ") << // bit 21
-			(cpuid.uPCOMMIT ? " +PCOMMIT " : " -PCOMMIT ") <<  // bit 22
-			(cpuid.uCLFLUSHOPT ? " +CLFLUSHOPT " : " -CLFLUSHOPT ") <<
-			(cpuid.uCLWB ? " +CLWB " : " -CLWB ") <<
-			(cpuid.uIntelProcessorTrace ? " +PT " : " -PT ") <<
-			(cpuid.uAVX512PF ? " +AVX512PF " : " -AVX512PF ") <<
-			(cpuid.uAVX512ER ? " +AVX512ER " : " -AVX512ER ") <<
-			(cpuid.uAVX512CD ? " +AVX512CD " : " -AVX512CD ") <<
-			(cpuid.uSHA ? " +SHA " : " -SHA ") << // bit 29
-			(cpuid.uAVX512BW ? " +AVX512BW " : " -AVX512BW ") <<
-			(cpuid.uAVX512VL ? " +AVX512VL " : " -AVX512VL ") <<
-			(cpuid.uPREFTEHCHWT1 ? " +PREFTEHCHWT1 " : " -PREFTEHCHWT1 ") <<
-			(cpuid.uAVX512VBMI ? " +AVX512VBMI " : " -AVX512VBMI ") <<
-			(cpuid.uPKU ? " +PKU " : " -PKU ") <<
-			(cpuid.uOSPKE ? " +OSPKE " : " -OSPKE ");
+			(cpuid.uFSGSBASE ? " +FSGSBASE" : " -FSGSBASE") <<
+			(cpuid.uIntelSGX ? " +SGX" : " -SGX") <<
+			(cpuid.uBMI1 ? " +BMI1" : " -BMI1") <<
+			(cpuid.uHLE ? " +HLE" : " -HLE") <<
+			(cpuid.uAVX2 ? " +AVX2" : " -AVX2") <<
+			(cpuid.uSMEP ? " +SMEP" : " -SMEP") <<
+			(cpuid.uBMI2 ? " +BMI2" : " -BMI2") <<
+			(cpuid.uFastStringOperation ? " +FastString" : " -FastString") <<
+			(cpuid.uINVPCID ? " +INVPCID" : " -INVPCID") <<
+			(cpuid.uRTM ? " +RTM" : " -RTM") <<
+			(cpuid.uPQM ? " +PQM" : " -PQM") <<
+			(cpuid.uIntelMPX ? " +MPX" : " -MPX") <<
+			(cpuid.uPQE ? " +PQE" : " -PQE") <<
+			(cpuid.uAVX512F ? " +AVX512F" : " -AVX512F") << // bit 16: avx-512 foundation
+			(cpuid.uAVX512DQ ? " +AVX512DQ" : " -AVX512DQ") << // bit 17: avx-512 doubleword and quadword instructions
+			(cpuid.uRDSEED ? " +RDSEED" : " -RDSEED") <<
+			(cpuid.uADX ? " +ADX" : " -ADX") <<
+			(cpuid.uSMAP ? " +SMAP" : " -SMAP") <<
+			(cpuid.uAVX512IFMA ? " +AVX512IFMA" : " -AVX512IFMA") << // bit 21
+			(cpuid.uPCOMMIT ? " +PCOMMIT" : " -PCOMMIT") <<  // bit 22
+			(cpuid.uCLFLUSHOPT ? " +CLFLUSHOPT" : " -CLFLUSHOPT") <<
+			(cpuid.uCLWB ? " +CLWB" : " -CLWB") <<
+			(cpuid.uIntelProcessorTrace ? " +PT" : " -PT") <<
+			(cpuid.uAVX512PF ? " +AVX512PF" : " -AVX512PF") <<
+			(cpuid.uAVX512ER ? " +AVX512ER" : " -AVX512ER") <<
+			(cpuid.uAVX512CD ? " +AVX512CD" : " -AVX512CD") <<
+			(cpuid.uSHA ? " +SHA" : " -SHA") << // bit 29
+			(cpuid.uAVX512BW ? " +AVX512BW" : " -AVX512BW") <<
+			(cpuid.uAVX512VL ? " +AVX512VL" : " -AVX512VL") <<
+			(cpuid.uPREFTEHCHWT1 ? " +PREFTEHCHWT1" : " -PREFTEHCHWT1") <<
+			(cpuid.uAVX512VBMI ? " +AVX512VBMI" : " -AVX512VBMI") <<
+			(cpuid.uPKU ? " +PKU" : " -PKU") <<
+			(cpuid.uOSPKE ? " +OSPKE" : " -OSPKE");
 	}
 	template <> struct cpuid_info_t<0x09>
 	{
