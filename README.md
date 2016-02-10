@@ -5,14 +5,22 @@ CPUID in C++ template, supporting output and input of cpuid data in human friend
 
 \#include "[cpuid.h](https://github.com/jrmwng/cpuid/blob/master/cpuid.h)"
 
-## How to output the CPUID trees?
+## How to ...
+
+- [How to output the CPUID trees?](#how-to-output-the-cpuid-trees)
+- [How to output a CPUID leaf?](#how-to-output-a-cpuid-leaf)
+- [How to save CPUID data to a file?](#how-to-save-cpuid-data-to-a-file)
+- [How to load CPUID data from a file?](#how-to-load-cpuid-data-from-a-file)
+- [How to check features?](#how-to-check-features)
+
+### How to output the CPUID trees?
 
       jrmwng::cpuid_tree_t<0x17> CPUID;
       jrmwng::cpuid_tree_t<0x80000008> ExtendedCPUID;
       
       std::cout << CPUID << ExtendedCPUID;
 
-### Sample Output (trees)
+#### Sample Output (trees)
 
            0   0       16 756e6547 6c65746e 49656e69 GenuineIntel
            1   0    406e3  3100800 7ffafbff bfebfbff +SSE3 +PCLMULQDQ +MONITOR +VMX +SMX +EIST +TM2 +SSSE3 +FMA +CMPXCHG16B +PDCM +SSE4.1 +SSE4.2 +x2APIC +MOVBE +POPCNT +TSC-Deadline +AES +XSAVE +OSXSAVE +AVX +F16C +RDRAND +FPU +VME +DE +PSE +TSC +MSR +PAE +MCE +CX8 +APIC +SEP +MTRR +PGE +MCA +CMOV +PAT +PSE36 -PSN +CLFSH +DS +ACPI +MMX +FXSR +SSE +SSE2 +SS +HTT +TM +PBE
@@ -59,20 +67,20 @@ CPUID in C++ template, supporting output and input of cpuid data in human friend
     80000007   0        0        0        0      100 +InvariantTSC
     80000008   0     3027        0        0        0 39b 48b
 
-## How to output a CPUID leaf?
+### How to output a CPUID leaf?
 
       jrmwng::cpuid_leaf_t<0x04> CPUID04;
       
       std::cout << CPUID04;
 
-### Sample Output (leaf 0x04)
+#### Sample Output (leaf 0x04)
 
      4   0      121  1c0003f       3f        0 D-Cache L1  1processor(s) 1core(s)  8way(s) * 1partition(s) * 64B *   64set(s) 
      4   1      122  1c0003f       3f        0 I-Cache L1  1processor(s) 1core(s)  8way(s) * 1partition(s) * 64B *   64set(s) 
      4   2      143  1c0003f      1ff        0 U-Cache L2  1processor(s) 1core(s)  8way(s) * 1partition(s) * 64B *  512set(s) 
      4   3      163  4c0003f     3fff        2 U-Cache L3  1processor(s) 1core(s) 20way(s) * 1partition(s) * 64B * 16384set(s) 
 
-## How to save CPUID data to a file?
+### How to save CPUID data to a file?
 
       jrmwng::cpuid_tree_t<0x17> CPUID;
       jrmwng::cpuid_tree_t<0x80000008> ExtendedCPUID;
@@ -80,7 +88,7 @@ CPUID in C++ template, supporting output and input of cpuid data in human friend
       std::ofstream ofs("cpuid.txt");
       ofs << CPUID << ExtendedCPUID;
 
-## How to load CPUID data from a file?
+### How to load CPUID data from a file?
 
       jrmwng::cpuid_tree_t<0x17> CPUID;
       jrmwng::cpuid_tree_t<0x80000008> ExtendedCPUID;
@@ -88,7 +96,7 @@ CPUID in C++ template, supporting output and input of cpuid data in human friend
       std::ifstream ifs("cpuid.txt");
       ifs >> CPUID >> ExtendedCPUID;
 
-## How to check features?
+### How to check features?
 
       jrmwng::cpuid_tree_t<0x17> CPUID;
       
