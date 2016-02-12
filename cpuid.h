@@ -64,7 +64,7 @@ namespace jrmwng
 		unsigned uSteppingID : 4; // [bits 3:0]
 		unsigned uModelID : 4; // [bits 7:4]
 		unsigned uFamilyID : 4; // [bits 11:8]
-		enum
+		enum processor_type
 		{
 			ORIGINAL_OEM_PROCESSOR = 0,
 			INTEL_OVERDRIVE_PROCESSOR = 1,
@@ -75,6 +75,16 @@ namespace jrmwng
 		unsigned uExtendedModelID : 4; // [bits 19:16]
 		unsigned uExtendedFamilyID : 8; // [bits 27:20]
 		unsigned : 4; // [bits 31:28]
+
+		unsigned family() const
+		{
+			return uFamilyID + uExtendedFamilyID;
+		}
+		unsigned model() const
+		{
+			return (uExtendedModelID << 4) | uModelID;
+		}
+
 		// ebx
 		unsigned uProcessorBrandIndex : 8; // [bits 7:0]
 		unsigned uLineSizeCLFLUSH : 8; // [bits 15:8]
@@ -153,8 +163,8 @@ namespace jrmwng
 		int const nMasks = os.setf(std::ios_base::hex | std::ios_base::uppercase);
 		os.unsetf(std::ios_base::dec);
 		os
-			<< ' ' << std::setw(2) << (cpuid.uFamilyID != 0x0F ? cpuid.uFamilyID : (cpuid.uExtendedFamilyID + cpuid.uFamilyID))
-			<< '_' << std::setw(2) << (cpuid.uFamilyID == 0x06 || cpuid.uFamilyID == 0x0F ? ((cpuid.uExtendedModelID << 4) + cpuid.uModelID) : cpuid.uModelID) << 'H';
+			<< ' ' << std::setw(2) << cpuid.family()
+			<< '_' << std::setw(2) << cpuid.model() << 'H';
 		os.setf(nMasks);
 		os.fill(cFill);
 		return os <<
@@ -226,7 +236,7 @@ namespace jrmwng
 	template <int nECX> struct cpuid_info_t<0x04, nECX>
 	{
 		// eax
-		enum
+		enum cache_type
 		{
 			NO_MORE_CACHES = 0,
 			DATA_CACHE = 1,
@@ -294,8 +304,8 @@ namespace jrmwng
 		unsigned uLargestLineSizeMONITOR : 16; // [bits 15:0]
 		unsigned : 16;
 		// ecx
-		unsigned uMWAIT_Extension : 1; // bit 0
-		unsigned uInterruptsAsBreakEvent : 1; // bit 1
+		unsigned uEMX : 1; // bit 0: Enumerate MONITOR/MWAIT extensions
+		unsigned uIBE : 1; // bit 1: Interrupt break-event
 		unsigned : 30;
 		// edx
 		unsigned uNumberOfC0 : 4;
@@ -311,8 +321,8 @@ namespace jrmwng
 	{
 		return os
 			<< " [" << (cpuid.uSmallestLineSizeMONITOR) << "B," << (cpuid.uLargestLineSizeMONITOR) << "B]"
-			<< (cpuid.uMWAIT_Extension ? " +MWAIT" : " -MWAIT")
-			<< (cpuid.uInterruptsAsBreakEvent ? " +InterruptsAsBreakEvent" : " -InterruptsAsBreakEvent")
+			<< (cpuid.uEMX ? " +EMX" : " -EMX")
+			<< (cpuid.uIBE ? " +IBE" : " -IBE")
 			<< ' ' << "C0/" << (cpuid.uNumberOfC0)
 			<< ' ' << "C1/" << (cpuid.uNumberOfC1)
 			<< ' ' << "C2/" << (cpuid.uNumberOfC2)
@@ -575,7 +585,9 @@ namespace jrmwng
 		// ecx
 		unsigned uSize : 32;
 		// edx
-		unsigned : 32;
+		unsigned : 30;
+		unsigned uStateLWP : 1; // bit 30: Lightweight Profiling
+		unsigned : 1;
 
 		unsigned max_sub_leaf() const
 		{
@@ -597,6 +609,7 @@ namespace jrmwng
 			(cpuid.uStateHi16_ZMM ? " +Hi16_ZMM" : " -Hi16_ZMM") <<
 			(cpuid.uStatePT ? " +PT" : " -PT") <<
 			(cpuid.uStatePKRU ? " +PKRU" : " -PKRU") <<
+			(cpuid.uStateLWP ? " +LWP" : " -LWP") <<
 			' ' << (cpuid.uSizeXCR0) << 'B' <<
 			' ' << (cpuid.uSize) << 'B';
 	}
@@ -905,39 +918,97 @@ namespace jrmwng
 	template <> struct cpuid_info_t<0x80000001>
 	{
 		// eax
-		unsigned uExtendedProcessorSignatureAndFeatureBits : 32;
+		unsigned uSteppingID : 4; // [bits 3:0]
+		unsigned uModelID : 4; // [bits 7:4]
+		unsigned uFamilyID : 4; // [bits 11:8]
+		enum processor_type
+		{
+			ORIGINAL_OEM_PROCESSOR = 0,
+			INTEL_OVERDRIVE_PROCESSOR = 1,
+			DUAL_PROCESSOR = 2,
+			INTEL_RESERVED = 3,
+		} emProcessorType: 2;
+		unsigned : 2; // [bits 15:14]
+		unsigned uExtendedModelID : 4; // [bits 19:16]
+		unsigned uExtendedFamilyID : 8; // [bits 27:20]
+		unsigned : 4; // [bits 31:28]
+
+		unsigned family() const
+		{
+			return uFamilyID + uExtendedFamilyID;
+		}
+		unsigned model() const
+		{
+			return (uExtendedModelID << 4) | uModelID;
+		}
+
 		//ebx
-		unsigned : 32;
+		unsigned uBrandID : 16; // [bits 15:0]
+		unsigned : 12; // [bits 27:16]
+		unsigned uPkgType : 4; // [bits 31:28]: Package type
 		// ecx
 		unsigned uLAHF_SAHF : 1; // bit 0
-		unsigned : 4;
+		unsigned uCmpLegacy : 1; // bit 1: Core multi-processing legacy mode
+		unsigned uSVM : 1; // bit 2: Secure Virtual Machine
+		unsigned uExtApicSpace : 1; // bit 3: Extended APIC space
+		unsigned uAltMovCr8 : 1; // bit 4
 		unsigned uLZCNT : 1; // bit 5
-		unsigned : 2;
+		unsigned uSSE4A : 1; // bit 6
+		unsigned uMisAlignSse : 1; // bit 7
 		unsigned uPREFTEHCHW : 1; // bit 8
-		unsigned : 23;
+		unsigned uOSVW : 1; // bit 9: OS visible workaround
+		unsigned uIBS : 1; // bit 10: Instruction based sampling
+		unsigned uXOP : 1; // bit 11
+		unsigned uSKINIT : 1; // bit 12: SKINIT / STGI
+		unsigned : 3;
+		unsigned uFMA4 : 1; // bit 16
+		unsigned : 4;
+		unsigned uTBM : 1; // bit 21: Trailing bit manipulation
+		unsigned : 7;
+		unsigned uMONITORX : 1; // bit 29
+		unsigned : 2;
 		// edx
 		unsigned : 11;
 		unsigned uSYSCALL_SYSRET_64bitMode : 1; // bit 11
 		unsigned : 8;
 		unsigned uExecuteDiableBit : 1; // bit 20
-		unsigned : 5;
+		unsigned : 1;
+		unsigned uMmxExt : 1; // bit 22: MMX Extensions
+		unsigned : 3;
 		unsigned u1GBytePages : 1; // bit 26
 		unsigned uRDTSCP : 1; // bit 27
 		unsigned : 1;
 		unsigned uIntel64 : 1; // bit 29
-		unsigned : 2;
+		unsigned u3DNowExt : 1; // bit 30
+		unsigned u3DNow : 1; // bit 31
 	};
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000001> const & cpuid)
 	{
 		return os <<
 			(cpuid.uLAHF_SAHF ? " +LAHF +SAHF" : " -LAHF -SAHF") <<
+			(cpuid.uCmpLegacy ? " +CmpLegacy" : " -CmpLegacy") <<
+			(cpuid.uSVM ? " +SVM" : " -SVM") <<
+			(cpuid.uExtApicSpace ? " +ExtApicSpace" : " -ExtApicSpace") <<
+			(cpuid.uAltMovCr8 ? " +AltMovCr8" : " -AltMovCr8") <<
 			(cpuid.uLZCNT ? " +LZCNT" : " -LZCNT") <<
+			(cpuid.uSSE4A ? " +SSE4A" : " -SSE4A") <<
+			(cpuid.uMisAlignSse ? " +MisAlignSse" : " -MisAlignSse") <<
 			(cpuid.uPREFTEHCHW ? " +PREFTEHCHW" : " -PREFTEHCHW") <<
+			(cpuid.uOSVW ? " +OSVW" : " -OSVW") <<
+			(cpuid.uIBS ? " +IBS" : " -IBS") <<
+			(cpuid.uXOP ? " +XOP" : " -XOP") <<
+			(cpuid.uSKINIT ? " +SKINIT" : " -SKINIT") <<
+			(cpuid.uFMA4 ? " +FMA4" : " -FMA4") <<
+			(cpuid.uTBM ? " +TBM" : " -TBM") <<
+			(cpuid.uMONITORX ? " +MONITORX" : " -MONITORX") <<
 			(cpuid.uSYSCALL_SYSRET_64bitMode ? " +SYSCALL@x64 +SYSRET@x64" : " -SYSCALL@x64 -SYSRET@x64") <<
 			(cpuid.uExecuteDiableBit ? " +ExecuteDisable" : " -ExecuteDisable") <<
+			(cpuid.uMmxExt ? " +MmxExt" : " -MmxExt") <<
 			(cpuid.u1GBytePages ? " +1GBytePages" : " -1GBytePages") <<
 			(cpuid.uRDTSCP ? " +RDTSCP" : " -RDTSCP") <<
-			(cpuid.uIntel64 ? " +x64" : " -x64");
+			(cpuid.uIntel64 ? " +x64" : " -x64") <<
+			(cpuid.u3DNowExt ? " +3DNowExt" : " -3DNowExt") <<
+			(cpuid.u3DNow ? " +3DNow!" : " -3DNow!");
 	}
 	template <> struct cpuid_info_t<0x80000002>
 	{
@@ -968,7 +1039,7 @@ namespace jrmwng
 		// ecx
 		unsigned uCacheLineSize : 8; // [bits 7:0]
 		unsigned : 4;
-		enum
+		enum l2_associativity
 		{
 			L2_DISABLED = 0,
 			L2_DIRECT_MAPPED = 1,
