@@ -1143,9 +1143,16 @@ namespace jrmwng
 	{
 		static_assert(sizeof(cpuid_info_t<nEAX, nECX>) == 16,"CPUID expects 4 32-bit integers");
 
-		cpuid_t()
+		explicit cpuid_t(unsigned uMaxEAX = static_cast<unsigned>(nEAX))
 		{
-			__cpuidex(reinterpret_cast<int*>(this), nEAX, nECX);
+			if (static_cast<unsigned>(nEAX) <= uMaxEAX)
+			{
+				__cpuidex(reinterpret_cast<int*>(this), nEAX, nECX);
+			}
+			else
+			{
+				_mm_storeu_si128(reinterpret_cast<__m128i*>(this), _mm_setzero_si128());
+			}
 		}
 		cpuid_t(std::istream & is)
 		{
@@ -1263,7 +1270,9 @@ namespace jrmwng
 		: cpuid_sub_leaf_t<nEAX, nECX - 1>
 		, cpuid_t<nEAX, nECX>
 	{
-		cpuid_sub_leaf_t()
+		explicit cpuid_sub_leaf_t(unsigned uMaxEAX = static_cast<unsigned>(nEAX))
+			: cpuid_sub_leaf_t<nEAX, nECX - 1>(uMaxEAX)
+			, cpuid_t<nEAX, nECX>(uMaxEAX)
 		{}
 		cpuid_sub_leaf_t(std::istream & is)
 			: cpuid_sub_leaf_t<nEAX, nECX - 1>(is)
@@ -1289,7 +1298,8 @@ namespace jrmwng
 	struct cpuid_sub_leaf_t<nEAX>
 		: cpuid_t<nEAX>
 	{
-		cpuid_sub_leaf_t()
+		explicit cpuid_sub_leaf_t(unsigned uMaxEAX = static_cast<unsigned>(nEAX))
+			: cpuid_t<nEAX>(uMaxEAX)
 		{}
 		cpuid_sub_leaf_t(std::istream & is)
 			: cpuid_t<nEAX>(is)
@@ -1319,7 +1329,8 @@ namespace jrmwng
 	struct cpuid_leaf_t
 		: cpuid_sub_leaf_t<nEAX, cpuid_leaf_traits<nEAX>::MAX_ECX>
 	{
-		cpuid_leaf_t()
+		explicit cpuid_leaf_t(unsigned uMaxEAX = static_cast<unsigned>(nEAX))
+			: cpuid_sub_leaf_t<nEAX, cpuid_leaf_traits<nEAX>::MAX_ECX>(uMaxEAX)
 		{}
 		cpuid_leaf_t(std::istream & is)
 			: cpuid_sub_leaf_t<nEAX, cpuid_leaf_traits<nEAX>::MAX_ECX>(is)
@@ -1352,6 +1363,7 @@ namespace jrmwng
 		, cpuid_leaf_t<nEAX>
 	{
 		cpuid_tree_t()
+			: cpuid_leaf_t<nEAX>(max_leaf())
 		{}
 		cpuid_tree_t(std::istream & is)
 			: cpuid_tree_t<nEAX - 1>(is)
