@@ -68,12 +68,6 @@ int main()
 	if (CPUID.uIntelSGX)
 		std::cout << "Intel SGX is available" << std::endl;
 
-	// print strings
-
-	std::cout << CPUID.vendor_identification_string().m128i_i8 << std::endl;
-	std::cout << CPUID.soc_vendor_brand_string() << std::endl;
-	std::cout << CPUID.processor_brand_string() << std::endl;
-
 	// print leaf 0x0B
 
 	DWORD_PTR dwProcessAffinityMask = 0;
