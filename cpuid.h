@@ -1098,6 +1098,21 @@ namespace jrmwng
 		case cpuid_info_t<0x80000006>::L2_16WAY:
 			os << " 16-way";
 			break;
+		case cpuid_info_t<0x80000006>::L2_32WAY:
+			os << " 32-way";
+			break;
+		case cpuid_info_t<0x80000006>::L2_48WAY:
+			os << " 48-way";
+			break;
+		case cpuid_info_t<0x80000006>::L2_64WAY:
+			os << " 64-way";
+			break;
+		case cpuid_info_t<0x80000006>::L2_96WAY:
+			os << " 96-way";
+			break;
+		case cpuid_info_t<0x80000006>::L2_128WAY:
+			os << " 128-way";
+			break;
 		case cpuid_info_t<0x80000006>::L2_FULLY_ASSOCIATIVE:
 			os << " FullyAssociative";
 			break;
@@ -1141,6 +1156,58 @@ namespace jrmwng
 			<< ' ' << (cpuid.uNumOfPhysicalAddressBits) << 'b'
 			<< ' ' << (cpuid.uNumOfLinearAddressBits) << 'b';
 	}
+	template <> struct cpuid_info_t<0x8000001B>
+	{
+		// eax
+		//0 IBSFFV IBS feature flags valid. 
+		unsigned uIBSFFV : 1;
+		//1 FetchSam IBS fetch sampling supported.
+		unsigned uFetchSam : 1;
+		//2 OpSam IBS execution sampling supported.
+		unsigned uOpSam : 1;
+		//3 RdWrOpCnt Read write of op counter supported.
+		unsigned uRdWrOpCnt : 1;
+		//4 OpCnt Op counting mode supported.
+		unsigned uOpCnt : 1;
+		//5 BrnTrgt Branch target address reporting supported.
+		unsigned uBrnTrgt : 1;
+		//6 OpCntExt IbsOpCurCnt and IbsOpMaxCnt extend by 7 bits.
+		unsigned uOpCntExt : 1;
+		//7 RipInvalidChk Invalid RIP indication supported.
+		unsigned uRipInvalidChk : 1;
+		//8 OpBrnFuse Fused branch micro - op indication supported.
+		unsigned uOpBrnFuse : 1;
+		unsigned : 23;
+		// ebx
+		unsigned : 32;
+		// ecx
+		unsigned : 32;
+		// edx
+		unsigned : 32;
+	};
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x8000001B> const & cpuid)
+	{
+		return os
+			//0 IBSFFV IBS feature flags valid. 
+			<< (cpuid.uIBSFFV ? " +IBSFFV" : " -IBSFFV")
+			//1 FetchSam IBS fetch sampling supported.
+			<< (cpuid.uFetchSam ? " +FetchSam" : " -FetchSam")
+			//2 OpSam IBS execution sampling supported.
+			<< (cpuid.uOpSam ? " +OpSam" : " -OpSam")
+			//3 RdWrOpCnt Read write of op counter supported.
+			<< (cpuid.uRdWrOpCnt ? " +RdWrOpCnt" : " -RdWrOpCnt")
+			//4 OpCnt Op counting mode supported.
+			<< (cpuid.uOpCnt ? " +OpCnt" : " -OpCnt")
+			//5 BrnTrgt Branch target address reporting supported.
+			<< (cpuid.uBrnTrgt ? " +BrnTrgt" : " -BrnTrgt")
+			//6 OpCntExt IbsOpCurCnt and IbsOpMaxCnt extend by 7 bits.
+			<< (cpuid.uOpCntExt ? " +OpCntExt" : " -OpCntExt")
+			//7 RipInvalidChk Invalid RIP indication supported.
+			<< (cpuid.uRipInvalidChk ? " +RipInvalidChk" : " -RipInvalidChk")
+			//8 OpBrnFuse Fused branch micro - op indication supported.
+			<< (cpuid.uOpBrnFuse ? " +OpBrnFuse" : " -OpBrnFuse")
+			;
+	}
 
 	template <int nEAX, int nECX = 0>
 	struct cpuid_t
@@ -1170,17 +1237,24 @@ namespace jrmwng
 			{
 				return os;
 			}
-			int nMask = os.setf(std::ios_base::hex);
-			os.unsetf(std::ios_base::dec);
-			os  <<        std::setw(8) << static_cast<unsigned>(nEAX)
-				<< ' ' << std::setw(3) << static_cast<unsigned>(nECX)
-				<< ' ' << std::setw(8) << reinterpret_cast<unsigned const*>(this)[0]
-				<< ' ' << std::setw(8) << reinterpret_cast<unsigned const*>(this)[1]
-				<< ' ' << std::setw(8) << reinterpret_cast<unsigned const*>(this)[2]
-				<< ' ' << std::setw(8) << reinterpret_cast<unsigned const*>(this)[3];
-			os.setf(nMask);
-			os <<
-				static_cast<cpuid_info_t<nEAX, nECX>const&>(*this) << std::endl;
+
+			if (reinterpret_cast<int const*>(this)[0] != 0 ||
+				reinterpret_cast<int const*>(this)[1] != 0 ||
+				reinterpret_cast<int const*>(this)[2] != 0 ||
+				reinterpret_cast<int const*>(this)[3] != 0)
+			{
+				int nMask = os.setf(std::ios_base::hex);
+				os.unsetf(std::ios_base::dec);
+				os << std::setw(8) << static_cast<unsigned>(nEAX)
+					<< ' ' << std::setw(3) << static_cast<unsigned>(nECX)
+					<< ' ' << std::setw(8) << reinterpret_cast<unsigned const*>(this)[0]
+					<< ' ' << std::setw(8) << reinterpret_cast<unsigned const*>(this)[1]
+					<< ' ' << std::setw(8) << reinterpret_cast<unsigned const*>(this)[2]
+					<< ' ' << std::setw(8) << reinterpret_cast<unsigned const*>(this)[3];
+				os.setf(nMask);
+				os <<
+					static_cast<cpuid_info_t<nEAX, nECX>const&>(*this) << std::endl;
+			}
 			return os;
 		}
 		std::istream & scan(std::istream & is)
@@ -1320,16 +1394,16 @@ namespace jrmwng
 	};
 	template <int nEAX> struct cpuid_leaf_traits
 	{
-		enum { MAX_ECX = 0 };
+		enum config { MAX_ECX = 0 };
 	};
-	template <> struct cpuid_leaf_traits<0x04> { enum { MAX_ECX = 4 }; };
-	template <> struct cpuid_leaf_traits<0x07> { enum { MAX_ECX = 1 }; };
-	template <> struct cpuid_leaf_traits<0x0B> { enum { MAX_ECX = 2 }; };
-	template <> struct cpuid_leaf_traits<0x0D> { enum { MAX_ECX = 9 }; };
-	template <> struct cpuid_leaf_traits<0x0F> { enum { MAX_ECX = 2 }; };
-	template <> struct cpuid_leaf_traits<0x10> { enum { MAX_ECX = 1 }; };
-	template <> struct cpuid_leaf_traits<0x14> { enum { MAX_ECX = 1 }; };
-	template <> struct cpuid_leaf_traits<0x17> { enum { MAX_ECX = 3 }; };
+	template <> struct cpuid_leaf_traits<0x04> { enum config { MAX_ECX = 4 }; };
+	template <> struct cpuid_leaf_traits<0x07> { enum config { MAX_ECX = 1 }; };
+	template <> struct cpuid_leaf_traits<0x0B> { enum config { MAX_ECX = 2 }; };
+	template <> struct cpuid_leaf_traits<0x0D> { enum config { MAX_ECX = 9 }; };
+	template <> struct cpuid_leaf_traits<0x0F> { enum config { MAX_ECX = 2 }; };
+	template <> struct cpuid_leaf_traits<0x10> { enum config { MAX_ECX = 1 }; };
+	template <> struct cpuid_leaf_traits<0x14> { enum config { MAX_ECX = 1 }; };
+	template <> struct cpuid_leaf_traits<0x17> { enum config { MAX_ECX = 3 }; };
 	template <int nEAX>
 	struct cpuid_leaf_t
 		: cpuid_sub_leaf_t<nEAX, cpuid_leaf_traits<nEAX>::MAX_ECX>
