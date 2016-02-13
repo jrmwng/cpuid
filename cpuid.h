@@ -1166,60 +1166,60 @@ namespace jrmwng
 		// ecx
 		unsigned : 32;
 		// edx
-		//0 NP Nested paging.Indicates support for nested paging.See “Nested Paging.”
+		//0 NP Nested paging.Indicates support for nested paging.See â€œNested Paging.â€
 		unsigned uNP : 1;
-		//1 LbrVirt LBR virtualization.Indicates support for LBR Virtualization.See “Enabling LBR Virtualization.”
+		//1 LbrVirt LBR virtualization.Indicates support for LBR Virtualization.See â€œEnabling LBR Virtualization.â€
 		unsigned uLbrVirt : 1;
-		//2 SVML SVM lock.Indicates support for SVM - Lock.See “Enabling SVM.”
+		//2 SVML SVM lock.Indicates support for SVM - Lock.See â€œEnabling SVM.â€
 		unsigned uSVML : 1;
-		//3 NRIPS NRIP save.Indicates support for NRIP save on #VMEXIT.See “State Saved on Exit.”
+		//3 NRIPS NRIP save.Indicates support for NRIP save on #VMEXIT.See â€œState Saved on Exit.â€
 		unsigned uNRIPS : 1;
-		//4 TscRateMsr MSR based TSC rate control.Indicates support for MSR TSC ratio MSRC000_0104.See “TSC Ratio MSR(C000_0104h).”
+		//4 TscRateMsr MSR based TSC rate control.Indicates support for MSR TSC ratio MSRC000_0104.See â€œTSC Ratio MSR(C000_0104h).â€
 		unsigned uTscRateMsr : 1;
-		//5 VmcbClean VMCB clean bits.Indicates support for VMCB clean bits.See “VMCB Clean Bits.”
+		//5 VmcbClean VMCB clean bits.Indicates support for VMCB clean bits.See â€œVMCB Clean Bits.â€
 		unsigned uVmcbClean : 1;
-		//6 FlushByAsid  by ASID.Indicates that TLB flush events, including CR3 writes and CR4.PGE toggles, flush only the current ASID's TLB entries. Also indicates support for the extended VMCB TLB_Control. See “TLB Control.” 
+		//6 FlushByAsid  by ASID.Indicates that TLB flush events, including CR3 writes and CR4.PGE toggles, flush only the current ASID's TLB entries. Also indicates support for the extended VMCB TLB_Control. See â€œTLB Control.â€ 
 		unsigned uFlushByAsid : 1;
-		//7 DecodeAssists Decode assists.Indicates support for the decode assists.See “Decode Assists.”
+		//7 DecodeAssists Decode assists.Indicates support for the decode assists.See â€œDecode Assists.â€
 		unsigned uDecodeAssists : 1;
-		//9:8 — Reserved.
+		//9:8 â€” Reserved.
 		unsigned : 2;
-		//10 PauseFilter Pause intercept filter.Indicates support for the pause intercept filter.See “Pause Intercept Filtering.”
+		//10 PauseFilter Pause intercept filter.Indicates support for the pause intercept filter.See â€œPause Intercept Filtering.â€
 		unsigned uPauseFilter : 1;
-		//11 — Reserved.
+		//11 â€” Reserved.
 		unsigned : 1;
-		//12 PauseFilterThreshold PAUSE filter threshold.Indicates support for the PAUSE filter cycle count threshold.See "Pause Intercept Filtering.”
+		//12 PauseFilterThreshold PAUSE filter threshold.Indicates support for the PAUSE filter cycle count threshold.See "Pause Intercept Filtering.â€
 		unsigned uPauseFilterThreshold : 1;
-		//13 AVIC Support for the AMD advanced virtual interrupt controller.See “Advanced Virtual Interrupt Controller.”
+		//13 AVIC Support for the AMD advanced virtual interrupt controller.See â€œAdvanced Virtual Interrupt Controller.â€
 		unsigned uAVIC : 1;
 		unsigned : 18;
 	};
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x8000000A> const & cpuid)
 	{
 		return os
-			//0 NP Nested paging.Indicates support for nested paging.See “Nested Paging.”
+			//0 NP Nested paging.Indicates support for nested paging.See â€œNested Paging.â€
 			<< (cpuid.uNP ? " +NP" : " -NP")
-			//1 LbrVirt LBR virtualization.Indicates support for LBR Virtualization.See “Enabling LBR Virtualization.”
+			//1 LbrVirt LBR virtualization.Indicates support for LBR Virtualization.See â€œEnabling LBR Virtualization.â€
 			<< (cpuid.uLbrVirt ? " +LbrVirt" : " -LbrVirt")
-			//2 SVML SVM lock.Indicates support for SVM - Lock.See “Enabling SVM.”
+			//2 SVML SVM lock.Indicates support for SVM - Lock.See â€œEnabling SVM.â€
 			<< (cpuid.uSVML ? " +SVML" : " -SVML")
-			//3 NRIPS NRIP save.Indicates support for NRIP save on #VMEXIT.See “State Saved on Exit.”
+			//3 NRIPS NRIP save.Indicates support for NRIP save on #VMEXIT.See â€œState Saved on Exit.â€
 			<< (cpuid.uNRIPS ? " +NRIPS" : " -NRIPS")
-			//4 TscRateMsr MSR based TSC rate control.Indicates support for MSR TSC ratio MSRC000_0104.See “TSC Ratio MSR(C000_0104h).”
+			//4 TscRateMsr MSR based TSC rate control.Indicates support for MSR TSC ratio MSRC000_0104.See â€œTSC Ratio MSR(C000_0104h).â€
 			<< (cpuid.uTscRateMsr ? " +TscRateMsr" : " -TscRateMsr")
-			//5 VmcbClean VMCB clean bits.Indicates support for VMCB clean bits.See “VMCB Clean Bits.”
+			//5 VmcbClean VMCB clean bits.Indicates support for VMCB clean bits.See â€œVMCB Clean Bits.â€
 			<< (cpuid.uVmcbClean ? " +VmcbClean" : " -VmcbClean")
-			//6 FlushByAsid  by ASID.Indicates that TLB flush events, including CR3 writes and CR4.PGE toggles, flush only the current ASID's TLB entries. Also indicates support for the extended VMCB TLB_Control. See “TLB Control.” 
+			//6 FlushByAsid  by ASID.Indicates that TLB flush events, including CR3 writes and CR4.PGE toggles, flush only the current ASID's TLB entries. Also indicates support for the extended VMCB TLB_Control. See â€œTLB Control.â€ 
 			<< (cpuid.uFlushByAsid ? " +FlushByAsid" : " -FlushByAsid")
-			//7 DecodeAssists Decode assists.Indicates support for the decode assists.See “Decode Assists.”
+			//7 DecodeAssists Decode assists.Indicates support for the decode assists.See â€œDecode Assists.â€
 			<< (cpuid.uDecodeAssists ? " +DecodeAssists" : " -DecodeAssists")
-			//9:8 — Reserved.
-			//10 PauseFilter Pause intercept filter.Indicates support for the pause intercept filter.See “Pause Intercept Filtering.”
+			//9:8 â€” Reserved.
+			//10 PauseFilter Pause intercept filter.Indicates support for the pause intercept filter.See â€œPause Intercept Filtering.â€
 			<< (cpuid.uPauseFilter ? " +PauseFilter" : " -PauseFilter")
-			//11 — Reserved.
-			//12 PauseFilterThreshold PAUSE filter threshold.Indicates support for the PAUSE filter cycle count threshold.See "Pause Intercept Filtering.”
+			//11 â€” Reserved.
+			//12 PauseFilterThreshold PAUSE filter threshold.Indicates support for the PAUSE filter cycle count threshold.See "Pause Intercept Filtering.â€
 			<< (cpuid.uPauseFilterThreshold ? " +PauseFilterThreshold" : " -PauseFilterThreshold")
-			//13 AVIC Support for the AMD advanced virtual interrupt controller.See “Advanced Virtual Interrupt Controller.”
+			//13 AVIC Support for the AMD advanced virtual interrupt controller.See â€œAdvanced Virtual Interrupt Controller.â€
 			<< (cpuid.uAVIC ? " +AVIC" : " -AVIC")
 			;
 	};
