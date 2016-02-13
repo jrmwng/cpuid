@@ -1156,6 +1156,73 @@ namespace jrmwng
 			<< ' ' << (cpuid.uNumOfPhysicalAddressBits) << 'b'
 			<< ' ' << (cpuid.uNumOfLinearAddressBits) << 'b';
 	}
+	template <> struct cpuid_info_t<0x8000000A>
+	{
+		// eax
+		unsigned uSvmRev : 8;
+		unsigned : 24;
+		// ebx
+		unsigned uNASID : 32;
+		// ecx
+		unsigned : 32;
+		// edx
+		//0 NP Nested paging.Indicates support for nested paging.See “Nested Paging.”
+		unsigned uNP : 1;
+		//1 LbrVirt LBR virtualization.Indicates support for LBR Virtualization.See “Enabling LBR Virtualization.”
+		unsigned uLbrVirt : 1;
+		//2 SVML SVM lock.Indicates support for SVM - Lock.See “Enabling SVM.”
+		unsigned uSVML : 1;
+		//3 NRIPS NRIP save.Indicates support for NRIP save on #VMEXIT.See “State Saved on Exit.”
+		unsigned uNRIPS : 1;
+		//4 TscRateMsr MSR based TSC rate control.Indicates support for MSR TSC ratio MSRC000_0104.See “TSC Ratio MSR(C000_0104h).”
+		unsigned uTscRateMsr : 1;
+		//5 VmcbClean VMCB clean bits.Indicates support for VMCB clean bits.See “VMCB Clean Bits.”
+		unsigned uVmcbClean : 1;
+		//6 FlushByAsid  by ASID.Indicates that TLB flush events, including CR3 writes and CR4.PGE toggles, flush only the current ASID's TLB entries. Also indicates support for the extended VMCB TLB_Control. See “TLB Control.” 
+		unsigned uFlushByAsid : 1;
+		//7 DecodeAssists Decode assists.Indicates support for the decode assists.See “Decode Assists.”
+		unsigned uDecodeAssists : 1;
+		//9:8 — Reserved.
+		unsigned : 2;
+		//10 PauseFilter Pause intercept filter.Indicates support for the pause intercept filter.See “Pause Intercept Filtering.”
+		unsigned uPauseFilter : 1;
+		//11 — Reserved.
+		unsigned : 1;
+		//12 PauseFilterThreshold PAUSE filter threshold.Indicates support for the PAUSE filter cycle count threshold.See "Pause Intercept Filtering.”
+		unsigned uPauseFilterThreshold : 1;
+		//13 AVIC Support for the AMD advanced virtual interrupt controller.See “Advanced Virtual Interrupt Controller.”
+		unsigned uAVIC : 1;
+		unsigned : 18;
+	};
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x8000000A> const & cpuid)
+	{
+		return os
+			//0 NP Nested paging.Indicates support for nested paging.See “Nested Paging.”
+			<< (cpuid.uNP ? " +NP" : " -NP")
+			//1 LbrVirt LBR virtualization.Indicates support for LBR Virtualization.See “Enabling LBR Virtualization.”
+			<< (cpuid.uLbrVirt ? " +LbrVirt" : " -LbrVirt")
+			//2 SVML SVM lock.Indicates support for SVM - Lock.See “Enabling SVM.”
+			<< (cpuid.uSVML ? " +SVML" : " -SVML")
+			//3 NRIPS NRIP save.Indicates support for NRIP save on #VMEXIT.See “State Saved on Exit.”
+			<< (cpuid.uNRIPS ? " +NRIPS" : " -NRIPS")
+			//4 TscRateMsr MSR based TSC rate control.Indicates support for MSR TSC ratio MSRC000_0104.See “TSC Ratio MSR(C000_0104h).”
+			<< (cpuid.uTscRateMsr ? " +TscRateMsr" : " -TscRateMsr")
+			//5 VmcbClean VMCB clean bits.Indicates support for VMCB clean bits.See “VMCB Clean Bits.”
+			<< (cpuid.uVmcbClean ? " +VmcbClean" : " -VmcbClean")
+			//6 FlushByAsid  by ASID.Indicates that TLB flush events, including CR3 writes and CR4.PGE toggles, flush only the current ASID's TLB entries. Also indicates support for the extended VMCB TLB_Control. See “TLB Control.” 
+			<< (cpuid.uFlushByAsid ? " +FlushByAsid" : " -FlushByAsid")
+			//7 DecodeAssists Decode assists.Indicates support for the decode assists.See “Decode Assists.”
+			<< (cpuid.uDecodeAssists ? " +DecodeAssists" : " -DecodeAssists")
+			//9:8 — Reserved.
+			//10 PauseFilter Pause intercept filter.Indicates support for the pause intercept filter.See “Pause Intercept Filtering.”
+			<< (cpuid.uPauseFilter ? " +PauseFilter" : " -PauseFilter")
+			//11 — Reserved.
+			//12 PauseFilterThreshold PAUSE filter threshold.Indicates support for the PAUSE filter cycle count threshold.See "Pause Intercept Filtering.”
+			<< (cpuid.uPauseFilterThreshold ? " +PauseFilterThreshold" : " -PauseFilterThreshold")
+			//13 AVIC Support for the AMD advanced virtual interrupt controller.See “Advanced Virtual Interrupt Controller.”
+			<< (cpuid.uAVIC ? " +AVIC" : " -AVIC")
+			;
+	};
 	template <> struct cpuid_info_t<0x8000001B>
 	{
 		// eax
