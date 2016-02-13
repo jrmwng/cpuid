@@ -1119,43 +1119,139 @@ namespace jrmwng
 		}
 		return os << ' ' << cpuid.uCacheSize1K << "KB";
 	}
+	// Function 8000_0007h—Processor Power Management and RAS Capabilities
 	template <> struct cpuid_info_t<0x80000007>
 	{
 		// eax
 		unsigned : 32;
 		// ebx
-		unsigned : 32;
+		//0 McaOverflowRecov MCA overflow recovery support.If set, indicates that MCA overflow conditions(MCi_STATUS[Overflow] = 1) are not fatal; software may safely ignore such conditions.If clear, MCA overflow conditions require software to shut down the system.See APM2, Chapter 9, "Handling Machine Check Exceptions."
+		unsigned uMcaOverflowRecov : 1;
+		//1 SUCCOR Software uncorrectable error containment and recovery capability.The processor supports software containment of uncorrectable errors through context synchronizing data poisoning and deferred error interrupts; see APM2, Chapter 9, "Determining Machine - Check Architecture Support."
+		unsigned uSUCCOR : 1;
+		//2 HWA Hardware assert supported. Indicates support for MSRC001_10[DF:C0].
+		unsigned uHWA : 1;
+		unsigned : 29;
 		// ecx
-		unsigned : 32;
+		//31:0 CpuPwrSampleTimeRatio Specifies the ratio of the compute unit power accumulator sample period to the TSC counter period.
+		unsigned uCpuPwrSampleTimeRatio : 32;
 		// edx
-		unsigned : 8;
-		unsigned uInvariantTSC : 1; // bit 8
-		unsigned : 23;
+		//0 TS Temperature sensor.
+		unsigned uTS : 1;
+		//1 FID Frequency ID control.Function replaced by HwPstate.
+		unsigned uFID : 1;
+		//2 VID Voltage ID control.Function replaced by HwPstate.
+		unsigned uVID : 1;
+		//3 TTP THERMTRIP.
+		unsigned uTTP : 1;
+		//4 TM Hardware thermal control(HTC).
+		unsigned uTM : 1;
+		//5— Reserved.
+		unsigned : 1;
+		//6 100MHzSteps 100 MHz multiplier Control.
+		unsigned u100MHzSteps : 1;
+		//7 HwPstate Hardware P - state control.MSRC001_0061[P - state Current Limit], MSRC001_0062[P - state Control] and MSRC001_0063[P - state Status] exist.
+		unsigned uHwPstate : 1;
+		//8 TscInvariant TSC invariant.The TSC rate is ensured to be invariant across all P - States, CStates, and stop grant transitions(such as STPCLK Throttling); therefore the TSC is suitable for use as a source of time. 0 = No such guarantee is made and software should avoid attempting to use the TSC as a source of time.
+		unsigned uTscInvariant : 1;
+		//9 CPB Core performance boost.
+		unsigned uCPB : 1;
+		//10 EffFreqRO Read - only effective frequency interface. 1 = Indicates presence of MSRC000_00E7[Read - Only Max Performance Frequency Clock Count(MPerfReadOnly)] and MSRC000_00E8[Read - Only Actual Performance Frequency Clock Count(APerfReadOnly)].
+		unsigned uEffFreqR0 : 1;
+		//11 ProcFeedbackInterface Processor feedback interface.Value : 1. 1 = Indicates support for processor feedback interface.Note : This feature is deprecated.
+		unsigned uProcFeedbackInterface : 1;
+		//12 ProcPowerReporting Core power reporting interface supported.
+		unsigned uProcPowerReporting : 1;
+		unsigned : 19;
 	};
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000007> const & cpuid)
 	{
-		return os <<
-			(cpuid.uInvariantTSC ? " +InvariantTSC " : " -InvariantTSC ");
+		return os
+			//0 McaOverflowRecov MCA overflow recovery support.If set, indicates that MCA overflow conditions(MCi_STATUS[Overflow] = 1) are not fatal; software may safely ignore such conditions.If clear, MCA overflow conditions require software to shut down the system.See APM2, Chapter 9, "Handling Machine Check Exceptions."
+			<< (cpuid.uMcaOverflowRecov ? " +McaOverflowRecov" : " -McaOverflowRecov")
+			//1 SUCCOR Software uncorrectable error containment and recovery capability.The processor supports software containment of uncorrectable errors through context synchronizing data poisoning and deferred error interrupts; see APM2, Chapter 9, "Determining Machine - Check Architecture Support."
+			<< (cpuid.uSUCCOR ? " +SUCCOR" : " -SUCCOR")
+			//2 HWA Hardware assert supported. Indicates support for MSRC001_10[DF:C0].
+			<< (cpuid.uHWA ? " +HWA" : " -HWA")
+			//31:0 CpuPwrSampleTimeRatio Specifies the ratio of the compute unit power accumulator sample period to the TSC counter period.
+			<< " CpuPwrSampleTimeRatio=" << cpuid.uCpuPwrSampleTimeRatio
+			//0 TS Temperature sensor.
+			<< (cpuid.uTS ? " +TS" : " -TS")
+			//1 FID Frequency ID control.Function replaced by HwPstate.
+			<< (cpuid.uFID ? " +FID" : " -FID")
+			//2 VID Voltage ID control.Function replaced by HwPstate.
+			<< (cpuid.uVID ? " +VID" : " -VID")
+			//3 TTP THERMTRIP.
+			<< (cpuid.uTTP ? " +TTP" : " -TTP")
+			//4 TM Hardware thermal control(HTC).
+			<< (cpuid.uTM ? " +TM" : " -TM")
+			//5— Reserved.
+			//6 100MHzSteps 100 MHz multiplier Control.
+			<< (cpuid.u100MHzSteps ? " +100MHzSteps" : " -100MHzSteps")
+			//7 HwPstate Hardware P - state control.MSRC001_0061[P - state Current Limit], MSRC001_0062[P - state Control] and MSRC001_0063[P - state Status] exist.
+			<< (cpuid.uHwPstate ? " +HwPstate" : " -HwPstate")
+			//8 TscInvariant TSC invariant.The TSC rate is ensured to be invariant across all P - States, CStates, and stop grant transitions(such as STPCLK Throttling); therefore the TSC is suitable for use as a source of time. 0 = No such guarantee is made and software should avoid attempting to use the TSC as a source of time.
+			<< (cpuid.uTscInvariant ? " +TscInvariant" : " -TscInvariant")
+			//9 CPB Core performance boost.
+			<< (cpuid.uCPB ? " +CPB" : " -CPB")
+			//10 EffFreqRO Read - only effective frequency interface. 1 = Indicates presence of MSRC000_00E7[Read - Only Max Performance Frequency Clock Count(MPerfReadOnly)] and MSRC000_00E8[Read - Only Actual Performance Frequency Clock Count(APerfReadOnly)].
+			<< (cpuid.uEffFreqR0 ? " +EffFreqR0" : " -EffFreqR0")
+			//11 ProcFeedbackInterface Processor feedback interface.Value : 1. 1 = Indicates support for processor feedback interface.Note : This feature is deprecated.
+			<< (cpuid.uProcFeedbackInterface ? " +ProcFeedbackInterface" : " -ProcFeedbackInterface")
+			//12 ProcPowerReporting Core power reporting interface supported.
+			<< (cpuid.uProcPowerReporting ? " +ProcPowerReporting" : " -ProcPowerReporting")
+		;
 	}
+	// Function 8000_0008h—Processor Capacity Parameters
 	template <> struct cpuid_info_t<0x80000008>
 	{
 		// eax
-		unsigned uNumOfPhysicalAddressBits : 8; // [bits 7:0]
-		unsigned uNumOfLinearAddressBits : 8; // [bits 15:8]
-		unsigned : 16;
+		//7 : 0 PhysAddrSize Maximum physical byte address size in bits.When GuestPhysAddrSize is zero, this field also indicates the maximum guest physical address size.
+		unsigned uPhysAddrSize : 8;
+		//15 : 8 LinAddrSize Maximum linear byte address size in bits.
+		unsigned uLinAddrSize : 8;
+		//23:16 GuestPhysAddrSize Maximum guest physical byte address size in bits.This number applies only to guests using nested paging.When this field is zero, refer to the PhysAddrSize field for the maximum guest physical address size.See "Secure Virtual Machine" in APM2.
+		unsigned uGuestPhysAddrSize : 8;
+		unsigned : 8;
 		// ebx
 		unsigned : 32;
 		// ecx
-		unsigned : 32;
+		//7:0 NC Number of physical cores - 1. The number of cores in the processor is NC + 1 (e.g., if NC = 0, then there is one core).See "Legacy Method" on page 624.
+		unsigned uNC : 8;
+		//11:8 — Reserved.
+		unsigned : 4;
+		//15 : 12 ApicIdCoreIdSize APIC ID size.The number of bits in the initial APIC20[ApicId] value that indicate core ID within a processor.A zero value indicates that legacy methods must be used to derive the maximum number of cores.The size of this field determines the maximum number of cores(MNC) that the processor could theoretically support, not the actual number of cores that are actually implemented or enabled on the processor, as indicated by CPUID Fn8000_0008_ECX[NC]. if (ApicIdCoreIdSize[3:0] == 0) { // Used by legacy dual-core/single-core processors MNC = CPUID Fn8000_0008_ECX[NC] + 1; } else { // use ApicIdCoreIdSize[3:0] field MNC = (2 ^ ApicIdCoreIdSize[3:0]); }
+		unsigned uApicIdCoreIdSize : 4;
+		//17:16 PerfTscSize Performance time - stamp counter size.Indicates the size of MSRC001_0280[PTSC].Bits Description 00b 40 bits 01b 48 bits 10b 56 bits 11b 64 bits
+		enum performance_timestamp_counter_type
+		{
+			PTSC_40BITS = 0,
+			PTSC_48BITS = 1,
+			PTSC_56BITS = 2,
+			PTSC_64BITS = 3,
+		} emPerfTscSize: 2;
+		unsigned : 14;
 		// edx
 		unsigned : 32;
 	};
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000008> const & cpuid)
 	{
 		return os
-			<< ' ' << (cpuid.uNumOfPhysicalAddressBits) << 'b'
-			<< ' ' << (cpuid.uNumOfLinearAddressBits) << 'b';
+			//7 : 0 PhysAddrSize Maximum physical byte address size in bits.When GuestPhysAddrSize is zero, this field also indicates the maximum guest physical address size.
+			<< " PhysAddrSize=" << cpuid.uPhysAddrSize
+			//15 : 8 LinAddrSize Maximum linear byte address size in bits.
+			<< " LinAddrSize=" << cpuid.uLinAddrSize
+			//23:16 GuestPhysAddrSize Maximum guest physical byte address size in bits.This number applies only to guests using nested paging.When this field is zero, refer to the PhysAddrSize field for the maximum guest physical address size.See "Secure Virtual Machine" in APM2.
+			<< " GuestPhysAddrSize=" << cpuid.uGuestPhysAddrSize
+			//7:0 NC Number of physical cores - 1. The number of cores in the processor is NC + 1 (e.g., if NC = 0, then there is one core).See "Legacy Method" on page 624.
+			<< " NC=" << cpuid.uNC
+			//15 : 12 ApicIdCoreIdSize APIC ID size.The number of bits in the initial APIC20[ApicId] value that indicate core ID within a processor.A zero value indicates that legacy methods must be used to derive the maximum number of cores.The size of this field determines the maximum number of cores(MNC) that the processor could theoretically support, not the actual number of cores that are actually implemented or enabled on the processor, as indicated by CPUID Fn8000_0008_ECX[NC]. if (ApicIdCoreIdSize[3:0] == 0) { // Used by legacy dual-core/single-core processors MNC = CPUID Fn8000_0008_ECX[NC] + 1; } else { // use ApicIdCoreIdSize[3:0] field MNC = (2 ^ ApicIdCoreIdSize[3:0]); }
+			<< " ApicIdCoreIdSize=" << cpuid.uApicIdCoreIdSize
+			//17:16 PerfTscSize Performance time - stamp counter size.Indicates the size of MSRC001_0280[PTSC].Bits Description 00b 40 bits 01b 48 bits 10b 56 bits 11b 64 bits
+			<< " PerfTscSize=" << cpuid.emPerfTscSize
+			;
 	}
+	// Function 8000_000Ah—SVM Features
 	template <> struct cpuid_info_t<0x8000000A>
 	{
 		// eax
@@ -1166,63 +1262,68 @@ namespace jrmwng
 		// ecx
 		unsigned : 32;
 		// edx
-		//0 NP Nested paging.Indicates support for nested paging.See “Nested Paging.”
+		//0 NP Nested paging.Indicates support for nested paging.See "Nested Paging."
 		unsigned uNP : 1;
-		//1 LbrVirt LBR virtualization.Indicates support for LBR Virtualization.See “Enabling LBR Virtualization.”
+		//1 LbrVirt LBR virtualization.Indicates support for LBR Virtualization.See "Enabling LBR Virtualization."
 		unsigned uLbrVirt : 1;
-		//2 SVML SVM lock.Indicates support for SVM - Lock.See “Enabling SVM.”
+		//2 SVML SVM lock.Indicates support for SVM - Lock.See "Enabling SVM."
 		unsigned uSVML : 1;
-		//3 NRIPS NRIP save.Indicates support for NRIP save on #VMEXIT.See “State Saved on Exit.”
+		//3 NRIPS NRIP save.Indicates support for NRIP save on #VMEXIT.See "State Saved on Exit."
 		unsigned uNRIPS : 1;
-		//4 TscRateMsr MSR based TSC rate control.Indicates support for MSR TSC ratio MSRC000_0104.See “TSC Ratio MSR(C000_0104h).”
+		//4 TscRateMsr MSR based TSC rate control.Indicates support for MSR TSC ratio MSRC000_0104.See "TSC Ratio MSR(C000_0104h)."
 		unsigned uTscRateMsr : 1;
-		//5 VmcbClean VMCB clean bits.Indicates support for VMCB clean bits.See “VMCB Clean Bits.”
+		//5 VmcbClean VMCB clean bits.Indicates support for VMCB clean bits.See "VMCB Clean Bits."
 		unsigned uVmcbClean : 1;
-		//6 FlushByAsid  by ASID.Indicates that TLB flush events, including CR3 writes and CR4.PGE toggles, flush only the current ASID's TLB entries. Also indicates support for the extended VMCB TLB_Control. See “TLB Control.” 
+		//6 FlushByAsid  by ASID.Indicates that TLB flush events, including CR3 writes and CR4.PGE toggles, flush only the current ASID's TLB entries. Also indicates support for the extended VMCB TLB_Control. See "TLB Control." 
 		unsigned uFlushByAsid : 1;
-		//7 DecodeAssists Decode assists.Indicates support for the decode assists.See “Decode Assists.”
+		//7 DecodeAssists Decode assists.Indicates support for the decode assists.See "Decode Assists."
 		unsigned uDecodeAssists : 1;
 		//9:8 — Reserved.
 		unsigned : 2;
-		//10 PauseFilter Pause intercept filter.Indicates support for the pause intercept filter.See “Pause Intercept Filtering.”
+		//10 PauseFilter Pause intercept filter.Indicates support for the pause intercept filter.See "Pause Intercept Filtering."
 		unsigned uPauseFilter : 1;
 		//11 — Reserved.
 		unsigned : 1;
-		//12 PauseFilterThreshold PAUSE filter threshold.Indicates support for the PAUSE filter cycle count threshold.See "Pause Intercept Filtering.”
+		//12 PauseFilterThreshold PAUSE filter threshold.Indicates support for the PAUSE filter cycle count threshold.See "Pause Intercept Filtering."
 		unsigned uPauseFilterThreshold : 1;
-		//13 AVIC Support for the AMD advanced virtual interrupt controller.See “Advanced Virtual Interrupt Controller.”
+		//13 AVIC Support for the AMD advanced virtual interrupt controller.See "Advanced Virtual Interrupt Controller."
 		unsigned uAVIC : 1;
 		unsigned : 18;
 	};
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x8000000A> const & cpuid)
 	{
 		return os
-			//0 NP Nested paging.Indicates support for nested paging.See “Nested Paging.”
+			//7:0 SvmRev SVM revision number.
+			<< " SvmRev=" << cpuid.uSvmRev
+			//31:0 NASID Number of available address space identifiers (ASID). 
+			<< " NASID=" << cpuid.uNASID
+			//0 NP Nested paging.Indicates support for nested paging.See "Nested Paging."
 			<< (cpuid.uNP ? " +NP" : " -NP")
-			//1 LbrVirt LBR virtualization.Indicates support for LBR Virtualization.See “Enabling LBR Virtualization.”
+			//1 LbrVirt LBR virtualization.Indicates support for LBR Virtualization.See "Enabling LBR Virtualization."
 			<< (cpuid.uLbrVirt ? " +LbrVirt" : " -LbrVirt")
-			//2 SVML SVM lock.Indicates support for SVM - Lock.See “Enabling SVM.”
+			//2 SVML SVM lock.Indicates support for SVM - Lock.See "Enabling SVM."
 			<< (cpuid.uSVML ? " +SVML" : " -SVML")
-			//3 NRIPS NRIP save.Indicates support for NRIP save on #VMEXIT.See “State Saved on Exit.”
+			//3 NRIPS NRIP save.Indicates support for NRIP save on #VMEXIT.See "State Saved on Exit."
 			<< (cpuid.uNRIPS ? " +NRIPS" : " -NRIPS")
-			//4 TscRateMsr MSR based TSC rate control.Indicates support for MSR TSC ratio MSRC000_0104.See “TSC Ratio MSR(C000_0104h).”
+			//4 TscRateMsr MSR based TSC rate control.Indicates support for MSR TSC ratio MSRC000_0104.See "TSC Ratio MSR(C000_0104h)."
 			<< (cpuid.uTscRateMsr ? " +TscRateMsr" : " -TscRateMsr")
-			//5 VmcbClean VMCB clean bits.Indicates support for VMCB clean bits.See “VMCB Clean Bits.”
+			//5 VmcbClean VMCB clean bits.Indicates support for VMCB clean bits.See "VMCB Clean Bits."
 			<< (cpuid.uVmcbClean ? " +VmcbClean" : " -VmcbClean")
-			//6 FlushByAsid  by ASID.Indicates that TLB flush events, including CR3 writes and CR4.PGE toggles, flush only the current ASID's TLB entries. Also indicates support for the extended VMCB TLB_Control. See “TLB Control.” 
+			//6 FlushByAsid  by ASID.Indicates that TLB flush events, including CR3 writes and CR4.PGE toggles, flush only the current ASID's TLB entries. Also indicates support for the extended VMCB TLB_Control. See "TLB Control." 
 			<< (cpuid.uFlushByAsid ? " +FlushByAsid" : " -FlushByAsid")
-			//7 DecodeAssists Decode assists.Indicates support for the decode assists.See “Decode Assists.”
+			//7 DecodeAssists Decode assists.Indicates support for the decode assists.See "Decode Assists."
 			<< (cpuid.uDecodeAssists ? " +DecodeAssists" : " -DecodeAssists")
 			//9:8 — Reserved.
-			//10 PauseFilter Pause intercept filter.Indicates support for the pause intercept filter.See “Pause Intercept Filtering.”
+			//10 PauseFilter Pause intercept filter.Indicates support for the pause intercept filter.See "Pause Intercept Filtering."
 			<< (cpuid.uPauseFilter ? " +PauseFilter" : " -PauseFilter")
 			//11 — Reserved.
-			//12 PauseFilterThreshold PAUSE filter threshold.Indicates support for the PAUSE filter cycle count threshold.See "Pause Intercept Filtering.”
+			//12 PauseFilterThreshold PAUSE filter threshold.Indicates support for the PAUSE filter cycle count threshold.See "Pause Intercept Filtering."
 			<< (cpuid.uPauseFilterThreshold ? " +PauseFilterThreshold" : " -PauseFilterThreshold")
-			//13 AVIC Support for the AMD advanced virtual interrupt controller.See “Advanced Virtual Interrupt Controller.”
+			//13 AVIC Support for the AMD advanced virtual interrupt controller.See "Advanced Virtual Interrupt Controller."
 			<< (cpuid.uAVIC ? " +AVIC" : " -AVIC")
 			;
 	};
+	// Function 8000_001Bh—Instruction-Based Sampling Capabilities
 	template <> struct cpuid_info_t<0x8000001B>
 	{
 		// eax
