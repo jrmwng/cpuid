@@ -9,31 +9,29 @@ int main()
 {
 	// execution CPUID instructions
 
-	jrmwng::cpuid_tree_t<0x17> CPUID;
-	jrmwng::cpuid_tree_t<0x80000008> ExtendedCPUID;
+	jrmwng::cpuid_forest_t CPUID;
 
 	// print CPUID data
 
-	std::cout << CPUID << ExtendedCPUID;
+	std::cout << CPUID;
 
 	// output CPUID data to the file "cpuid.txt"
 
 	std::ofstream ofs("cpuid.txt");
 	{
-		ofs << CPUID << ExtendedCPUID;
+		ofs << CPUID;
 		ofs.close();
 	}
 
 	// zero data structures
 
 	memset(&CPUID, 0, sizeof(CPUID));
-	memset(&ExtendedCPUID, 0, sizeof(ExtendedCPUID));
 
 	// input CPUID data from the file "cpuid.txt"
 
 	std::ifstream ifs("cpuid.txt");
 	{
-		ifs >> CPUID >> ExtendedCPUID;
+		ifs >> CPUID;
 		ifs.close();
 	}
 
@@ -74,7 +72,7 @@ int main()
 
 	std::cout << CPUID.vendor_identification_string().m128i_i8 << std::endl;
 	std::cout << CPUID.soc_vendor_brand_string() << std::endl;
-	std::cout << ExtendedCPUID.processor_brand_string() << std::endl;
+	std::cout << CPUID.processor_brand_string() << std::endl;
 
 	// print leaf 0x0B
 
