@@ -1047,77 +1047,289 @@ namespace jrmwng
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000002> const & cpuid) { return (os << ' ').write(cpuid.ac, 16); }
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000003> const & cpuid) { return (os << ' ').write(cpuid.ac, 16); }
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000004> const & cpuid) { return (os << ' ').write(cpuid.ac, 16); }
+	// Function 8000_0005h—L1 Cache and TLB Information
+	template <> struct cpuid_info_t<0x80000005>
+	{
+		enum associativity
+		{
+			ASSOC_RESERVED = 0,
+			ASSOC_DIRECT_MAPPED = 1,
+			ASSOC_FULLY_ASSOCIATIVE = 0xFF
+		};
+
+		// eax
+		//7 : 0 L1ITlb2and4MSize Instruction TLB number of entries for 2 - MB and 4 - MB pages.The value returned is for the number of entries available for the 2 - MB page size; 4 - MB pages require two 2 - MB entries, so the number of entries available for the 4 - MB page size is one - half the returned value.
+		unsigned uL1ITlb2and4MSize : 8;
+		//15:8 L1ITlb2and4MAssoc Instruction TLB associativity for 2 - MB and 4 - MB pages.Encoding is per Table E - 3 below.
+		associativity emL1ITlb2and4MAssoc : 8;
+		//23 : 16 L1DTlb2and4MSize Data TLB number of entries for 2 - MB and 4 - MB pages.The value returned is for the number of entries available for the 2 - MB page size; 4 - MB pages require two 2 - MB entries, so the number of entries available for the 4 - MB page size is onehalf the returned value.
+		unsigned uL1DTlb2and4MSize : 8;
+		//31:24 L1DTlb2and4MAssoc Data TLB associativity for 2 - MB and 4 - MB pages.Encoding is per Table E - 3 below.
+		associativity emL1DTlb2and4MAssoc : 8;
+		// ebx
+		//7 : 0 L1ITlb4KSize Instruction TLB number of entries for 4 KB pages.
+		unsigned uL1ITlb4KSize : 8;
+		//15 : 8 L1ITlb4KAssoc Instruction TLB associativity for 4 KB pages.Encoding is per Table E - 3 above.
+		associativity emL1ITlb4KAssoc : 8;
+		//23 : 16 L1DTlb4KSize Data TLB number of entries for 4 KB pages.
+		unsigned uL1DTlb4KSize : 8;
+		//31:24 L1DTlb4KAssoc Data TLB associativity for 4 KB pages.Encoding is per Table E - 3 above.
+		associativity emL1DTlb4KAssoc : 8;
+		// ecx
+		//7 : 0 L1DcLineSize L1 data cache line size in bytes.
+		unsigned uL1DcLineSize : 8;
+		//15 : 8 L1DcLinesPerTag L1 data cache lines per tag.
+		unsigned uL1DcLinesPerTag : 8;
+		//23 : 16 L1DcAssoc L1 data cache associativity.Encoding is per Table E - 3.
+		associativity emL1DcAssoc : 8;
+		//31:24 L1DcSize L1 data cache size in KB.
+		unsigned uL1DcSize : 8;
+		// edx
+		//7 : 0 L1IcLineSize L1 instruction cache line size in bytes.
+		unsigned uL1IcLineSize : 8;
+		//15 : 8 L1IcLinesPerTag L1 instruction cache lines per tag.
+		unsigned uL1IcLinesPerTag : 8;
+		//23 : 16 L1IcAssoc L1 instruction cache associativity.Encoding is per Table E - 3.
+		associativity emL1IcAssoc : 8;
+		//31:24 L1IcSize L1 instruction cache size in KB.
+		unsigned uL1IcSize : 8;
+	};
+	std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000005>::associativity emAssociativity)
+	{
+		switch (emAssociativity)
+		{
+		case cpuid_info_t<0x80000005>::ASSOC_RESERVED:
+			return os << "Reserved";
+		case cpuid_info_t<0x80000005>::ASSOC_DIRECT_MAPPED:
+			return os << "DirectMapped";
+		case cpuid_info_t<0x80000005>::ASSOC_FULLY_ASSOCIATIVE:
+			return os << "FullyAssociative";
+		default:
+			return os << static_cast<unsigned>(emAssociativity) << "-way";
+		}
+	}
+	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000005> const & cpuid)
+	{
+		if (cpuid.emL1ITlb2and4MAssoc != cpuid.ASSOC_RESERVED)
+		{
+			os
+				//7 : 0 L1ITlb2and4MSize Instruction TLB number of entries for 2 - MB and 4 - MB pages.The value returned is for the number of entries available for the 2 - MB page size; 4 - MB pages require two 2 - MB entries, so the number of entries available for the 4 - MB page size is one - half the returned value.
+				<< " L1ITlb2and4MSize=" << cpuid.uL1ITlb2and4MSize
+				//15:8 L1ITlb2and4MAssoc Instruction TLB associativity for 2 - MB and 4 - MB pages.Encoding is per Table E - 3 below.
+				<< " L1ITlb2and4MAssoc=" << cpuid.emL1ITlb2and4MAssoc
+				;
+		}
+		if (cpuid.emL1DTlb2and4MAssoc != cpuid.ASSOC_RESERVED)
+		{
+			os
+				//23 : 16 L1DTlb2and4MSize Data TLB number of entries for 2 - MB and 4 - MB pages.The value returned is for the number of entries available for the 2 - MB page size; 4 - MB pages require two 2 - MB entries, so the number of entries available for the 4 - MB page size is onehalf the returned value.
+				<< " L1DTlb2and4MSize=" << cpuid.uL1DTlb2and4MSize
+				//31:24 L1DTlb2and4MAssoc Data TLB associativity for 2 - MB and 4 - MB pages.Encoding is per Table E - 3 below.
+				<< " L1DTlb2and4MAssoc=" << cpuid.emL1DTlb2and4MAssoc
+				;
+		}
+		if (cpuid.emL1ITlb4KAssoc != cpuid.ASSOC_RESERVED)
+		{
+			os
+				//7 : 0 L1ITlb4KSize Instruction TLB number of entries for 4 KB pages.
+				<< " L1ITlb4KSize=" << cpuid.uL1ITlb4KSize
+				//15 : 8 L1ITlb4KAssoc Instruction TLB associativity for 4 KB pages.Encoding is per Table E - 3 above.
+				<< " L1ITlb4KAssoc=" << cpuid.emL1ITlb4KAssoc
+				;
+		}
+		if (cpuid.emL1DTlb4KAssoc != cpuid.ASSOC_RESERVED)
+		{
+			os
+				//23 : 16 L1DTlb4KSize Data TLB number of entries for 4 KB pages.
+				<< " L1DTlb4KSize=" << cpuid.uL1DTlb4KSize
+				//31:24 L1DTlb4KAssoc Data TLB associativity for 4 KB pages.Encoding is per Table E - 3 above.
+				<< " L1DTlb4KAssoc=" << cpuid.emL1DTlb4KAssoc
+				;
+		}
+		if (cpuid.emL1DcAssoc != cpuid.ASSOC_RESERVED)
+		{
+			os
+				//7 : 0 L1DcLineSize L1 data cache line size in bytes.
+				<< " L1DcLineSize=" << cpuid.uL1DcLineSize << "B"
+				//15 : 8 L1DcLinesPerTag L1 data cache lines per tag.
+				<< " L1DcLinesPerTag=" << cpuid.uL1DcLinesPerTag
+				//23 : 16 L1DcAssoc L1 data cache associativity.Encoding is per Table E - 3.
+				<< " L1DcAssoc=" << cpuid.emL1DcAssoc
+				//31:24 L1DcSize L1 data cache size in KB.
+				<< " L1DcSize=" << cpuid.uL1DcSize << "KB"
+				;
+		}
+		if (cpuid.emL1IcAssoc != cpuid.ASSOC_RESERVED)
+		{
+			os
+				//7 : 0 L1IcLineSize L1 instruction cache line size in bytes.
+				<< " L1IcLineSize=" << cpuid.uL1IcLineSize << "B"
+				//15 : 8 L1IcLinesPerTag L1 instruction cache lines per tag.
+				<< " L1IcLinesPerTag=" << cpuid.uL1IcLinesPerTag
+				//23 : 16 L1IcAssoc L1 instruction cache associativity.Encoding is per Table E - 3.
+				<< " L1IcAssoc=" << cpuid.emL1IcAssoc
+				//31:24 L1IcSize L1 instruction cache size in KB.
+				<< " L1IcSize=" << cpuid.uL1IcSize << "KB"
+				;
+		}
+		return os;
+	}
+	// Function 8000_0006h—L2 Cache and TLB and L3 Cache Information
 	template <> struct cpuid_info_t<0x80000006>
 	{
-		// eax
-		unsigned : 32;
-		// ebx
-		unsigned : 32;
-		// ecx
-		unsigned uCacheLineSize : 8; // [bits 7:0]
-		unsigned : 4;
-		enum l2_associativity
+		enum associativity
 		{
-			L2_DISABLED = 0,
-			L2_DIRECT_MAPPED = 1,
-			L2_2WAY = 2,
-			L2_4WAY = 4,
-			L2_8WAY = 6,
-			L2_16WAY = 8,
-			L2_32WAY = 0xA,
-			L2_48WAY = 0xB,
-			L2_64WAY = 0xC,
-			L2_96WAY = 0xD,
-			L2_128WAY = 0xE,
-			L2_FULLY_ASSOCIATIVE = 0xF,
-		} emL2Associativity: 4; // [bits 15:12]
-		unsigned uCacheSize1K : 16; // [bits 31:16]
+			ASSOC_DISABLED = 0,
+			ASSOC_DIRECT_MAPPED = 1,
+			ASSOC_2WAY = 2,
+			ASSOC_4WAY = 4,
+			ASSOC_8WAY = 6,
+			ASSOC_16WAY = 8,
+			ASSOC_32WAY = 0xA,
+			ASSOC_48WAY = 0xB,
+			ASSOC_64WAY = 0xC,
+			ASSOC_96WAY = 0xD,
+			ASSOC_128WAY = 0xE,
+			ASSOC_FULLY_ASSOCIATIVE = 0xF,
+		};
+
+		// eax
+		//11 : 0 L2ITlb2and4MSize L2 instruction TLB number of entries for 2 - MB and 4 - MB pages.The value returned is for the number of entries available for the 2 MB page size; 4 MB pages require two 2 MB entries, so the number of entries available for the 4 MB page size is one - half the returned value.
+		unsigned uL2ITlb2and4MSize : 12;
+		//15:12 L2ITlb2and4MAssoc L2 instruction TLB associativity for 2 - MB and 4 - MB pages.Encoding is per Table E - 4 below.
+		associativity emL2ITlb2and4MAssoc : 4;
+		//27 : 16 L2DTlb2and4MSize L2 data TLB number of entries for 2 - MB and 4 - MB pages.The value returned is for the number of entries available for the 2 MB page size; 4 MB pages require two 2 MB entries, so the number of entries available for the 4 MB page size is one - half the returned value.
+		unsigned uL2DTlb2and4MSize : 12;
+		//31:28 L2DTlb2and4MAssoc L2 data TLB associativity for 2 - MB and 4 - MB pages.Encoding is per Table E - 4 below.
+		associativity emL2DTlb2and4MAssoc : 4;
+		// ebx
+		//11 : 0 L2ITlb4KSize L2 instruction TLB number of entries for 4 - KB pages.
+		unsigned uL2ITlb4KSize : 12;
+		//15 : 12 L2ITlb4KAssoc L2 instruction TLB associativity for 4 - KB pages.Encoding is per Table E - 4 above.
+		associativity emL2ITlb4KAssoc : 4;
+		//27 : 16 L2DTlb4KSize L2 data TLB number of entries for 4 - KB pages.
+		unsigned uL2DTlb4KSize : 12;
+		//31:28 L2DTlb4KAssoc L2 data TLB associativity for 4 - KB pages.Encoding is per Table E - 4 above.
+		associativity emL2DTlb4KAssoc : 4;
+		// ecx
+		//7 : 0 L2LineSize L2 cache line size in bytes.
+		unsigned uL2LineSize : 8;
+		//11 : 8 L2LinesPerTag L2 cache lines per tag.
+		unsigned uL2LinesPerTag : 4;
+		//15 : 12 L2Assoc L2 cache associativity.Encoding is per Table E - 4 on page 611.
+		associativity emL2Assoc : 4;
+		//31:16 L2Size L2 cache size in KB.
+		unsigned uL2Size : 16;
 		// edx
-		unsigned : 32;
+		//7 : 0 L3LineSize L3 cache line size in bytes.
+		unsigned uL3LineSize : 8;
+		//11 : 8 L3LinesPerTag L3 cache lines per tag.
+		unsigned uL3LinesPerTag : 4;
+		//15 : 12 L3Assoc L3 cache associativity.Encoded per Table E - 4 on page 611.
+		associativity emL3Assoc : 4;
+		//17 : 16 — Reserved.
+		unsigned : 2;
+		//31:18 L3Size Specifies the L3 cache size range : (L3Size[31:18] * 512KB) ≤ L3 cache size < ((L3Size[31:18] + 1) * 512KB).
+		unsigned uL3Size : 14;
 	};
+	std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000006>::associativity emAssociativity)
+	{
+		switch (emAssociativity)
+		{
+		case cpuid_info_t<0x80000006>::ASSOC_DISABLED:
+			return os << "Disabled";
+		case cpuid_info_t<0x80000006>::ASSOC_DIRECT_MAPPED:
+			return os << "DirectMapped";
+		case cpuid_info_t<0x80000006>::ASSOC_2WAY:
+			return os << "2-way";
+		case cpuid_info_t<0x80000006>::ASSOC_4WAY:
+			return os << "4-way";
+		case cpuid_info_t<0x80000006>::ASSOC_8WAY:
+			return os << "8-way";
+		case cpuid_info_t<0x80000006>::ASSOC_16WAY:
+			return os << "16-way";
+		case cpuid_info_t<0x80000006>::ASSOC_32WAY:
+			return os << "32-way";
+		case cpuid_info_t<0x80000006>::ASSOC_48WAY:
+			return os << "48-way";
+		case cpuid_info_t<0x80000006>::ASSOC_64WAY:
+			return os << "64-way";
+		case cpuid_info_t<0x80000006>::ASSOC_96WAY:
+			return os << "96-way";
+		case cpuid_info_t<0x80000006>::ASSOC_128WAY:
+			return os << "128-way";
+		case cpuid_info_t<0x80000006>::ASSOC_FULLY_ASSOCIATIVE:
+			return os << "FullyAssociative";
+		default:
+			return os;
+		}
+	}
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x80000006> const & cpuid)
 	{
-		os << ' ' << cpuid.uCacheLineSize << 'B';
-		switch (cpuid.emL2Associativity)
+		if (cpuid.emL2ITlb2and4MAssoc != cpuid.ASSOC_DISABLED)
 		{
-		case cpuid_info_t<0x80000006>::L2_DISABLED:
-			os << " Disabled";
-			break;
-		case cpuid_info_t<0x80000006>::L2_DIRECT_MAPPED:
-			os << " DirectMapped";
-			break;
-		case cpuid_info_t<0x80000006>::L2_2WAY:
-			os << " 2-way";
-			break;
-		case cpuid_info_t<0x80000006>::L2_4WAY:
-			os << " 4-way";
-			break;
-		case cpuid_info_t<0x80000006>::L2_8WAY:
-			os << " 8-way";
-			break;
-		case cpuid_info_t<0x80000006>::L2_16WAY:
-			os << " 16-way";
-			break;
-		case cpuid_info_t<0x80000006>::L2_32WAY:
-			os << " 32-way";
-			break;
-		case cpuid_info_t<0x80000006>::L2_48WAY:
-			os << " 48-way";
-			break;
-		case cpuid_info_t<0x80000006>::L2_64WAY:
-			os << " 64-way";
-			break;
-		case cpuid_info_t<0x80000006>::L2_96WAY:
-			os << " 96-way";
-			break;
-		case cpuid_info_t<0x80000006>::L2_128WAY:
-			os << " 128-way";
-			break;
-		case cpuid_info_t<0x80000006>::L2_FULLY_ASSOCIATIVE:
-			os << " FullyAssociative";
-			break;
+			os
+				//11 : 0 L2ITlb2and4MSize L2 instruction TLB number of entries for 2 - MB and 4 - MB pages.The value returned is for the number of entries available for the 2 MB page size; 4 MB pages require two 2 MB entries, so the number of entries available for the 4 MB page size is one - half the returned value.
+				<< " L2ITlb2and4MSize=" << cpuid.uL2ITlb2and4MSize
+				//15:12 L2ITlb2and4MAssoc L2 instruction TLB associativity for 2 - MB and 4 - MB pages.Encoding is per Table E - 4 below.
+				<< " L2ITlb2and4MAssoc=" << cpuid.emL2ITlb2and4MAssoc
+				;
 		}
-		return os << ' ' << cpuid.uCacheSize1K << "KB";
+		if (cpuid.emL2DTlb2and4MAssoc != cpuid.ASSOC_DISABLED)
+		{
+			os
+				//27 : 16 L2DTlb2and4MSize L2 data TLB number of entries for 2 - MB and 4 - MB pages.The value returned is for the number of entries available for the 2 MB page size; 4 MB pages require two 2 MB entries, so the number of entries available for the 4 MB page size is one - half the returned value.
+				<< " L2DTlb2and4MSize=" << cpuid.uL2DTlb2and4MSize
+				//31:28 L2DTlb2and4MAssoc L2 data TLB associativity for 2 - MB and 4 - MB pages.Encoding is per Table E - 4 below.
+				<< " L2DTlb2and4MAssoc=" << cpuid.emL2DTlb2and4MAssoc
+				;
+		}
+		if (cpuid.emL2ITlb4KAssoc != cpuid.ASSOC_DISABLED)
+		{
+			os
+				//11 : 0 L2ITlb4KSize L2 instruction TLB number of entries for 4 - KB pages.
+				<< " L2ITlb4KSize=" << cpuid.uL2ITlb4KSize
+				//15 : 12 L2ITlb4KAssoc L2 instruction TLB associativity for 4 - KB pages.Encoding is per Table E - 4 above.
+				<< " L2ITlb4KAssoc=" << cpuid.emL2ITlb4KAssoc
+				;
+		}
+		if (cpuid.emL2DTlb4KAssoc != cpuid.ASSOC_DISABLED)
+		{
+			os
+				//27 : 16 L2DTlb4KSize L2 data TLB number of entries for 4 - KB pages.
+				<< " L2DTlb4KSize=" << cpuid.uL2DTlb4KSize
+				//31:28 L2DTlb4KAssoc L2 data TLB associativity for 4 - KB pages.Encoding is per Table E - 4 above.
+				<< " L2DTlb4KAssoc=" << cpuid.emL2DTlb4KAssoc
+				;
+		}
+		if (cpuid.emL2Assoc != cpuid.ASSOC_DISABLED)
+		{
+			os
+				//7 : 0 L2LineSize L2 cache line size in bytes.
+				<< " L2LineSize=" << cpuid.uL2LineSize << "B"
+				//11 : 8 L2LinesPerTag L2 cache lines per tag.
+				<< " L2LinesPerTag=" << cpuid.uL2LinesPerTag
+				//15 : 12 L2Assoc L2 cache associativity.Encoding is per Table E - 4 on page 611.
+				<< " L2Assoc=" << cpuid.emL2Assoc
+				//31:16 L2Size L2 cache size in KB.
+				<< " L2Size=" << cpuid.uL2Size << "KB"
+				;
+		}
+		if (cpuid.emL3Assoc != cpuid.ASSOC_DISABLED)
+		{
+			os
+				//7 : 0 L3LineSize L3 cache line size in bytes.
+				<< " L3LineSize=" << cpuid.uL3LineSize << "B"
+				//11 : 8 L3LinesPerTag L3 cache lines per tag.
+				<< " L3LinesPerTag=" << cpuid.uL3LinesPerTag
+				//15 : 12 L3Assoc L3 cache associativity.Encoded per Table E - 4 on page 611.
+				<< " L3Assoc=" << cpuid.emL3Assoc
+				//17 : 16 — Reserved.
+				//31:18 L3Size Specifies the L3 cache size range : (L3Size[31:18] * 512KB) ≤ L3 cache size < ((L3Size[31:18] + 1) * 512KB).
+				<< " L3Size=[" << (cpuid.uL3Size * 512) << "KB," << (cpuid.uL3Size * 512 + 512) << "KB]"
+				;
+		}
+		return os;
 	}
 	// Function 8000_0007h—Processor Power Management and RAS Capabilities
 	template <> struct cpuid_info_t<0x80000007>
