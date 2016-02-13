@@ -170,23 +170,23 @@ namespace jrmwng
 		return os <<
 			(cpuid.uSSE3 ? " +SSE3" : " -SSE3") << //unsigned uSSE3 : 1; // bit 0
 			(cpuid.uPCLMULQDQ ? " +PCLMULQDQ" : " -PCLMULQDQ") << //unsigned uPCLMULQDQ : 1; // bit 1
-			//unsigned uDTES64 : 1; // bit 2
+			(cpuid.uDTES64 ? " +DTES64" : " -DTES64") << //unsigned uDTES64 : 1; // bit 2
 			(cpuid.uMONITOR ? " +MONITOR" : " -MONITOR") << //unsigned uMONITOR : 1; // bit 3
-			//unsigned uDS_CPL : 1; // bit 4
+			(cpuid.uDS_CPL ? " +DS_CPL" : " -DS_CPL") << //unsigned uDS_CPL : 1; // bit 4
 			(cpuid.uVMX ? " +VMX" : " -VMX") << //unsigned uVMX : 1; // bit 5
 			(cpuid.uSMX ? " +SMX" : " -SMX") << //unsigned uSMX : 1; // bit 6: Safer Mode Extensions
 			(cpuid.uEIST ? " +EIST" : " -EIST") << //unsigned uEIST : 1; // bit 7: Enhanced Intel SpeedStep technology
 			(cpuid.uTM2 ? " +TM2" : " -TM2") << //unsigned uTM2 : 1; // bit 8: Thermal Monitor 2
 			(cpuid.uSSSE3 ? " +SSSE3" : " -SSSE3") << //unsigned uSSSE3 : 1; // bit 9
-			//unsigned uCNXT_ID : 1; // bit 10: L1 Context ID
-			//unsigned uSDBG : 1; // bit 11
+			(cpuid.uCNXT_ID ? " +CNXT_ID" : " -CNXT_ID") << //unsigned uCNXT_ID : 1; // bit 10: L1 Context ID
+			(cpuid.uSDBG ? " +SDBG" : " -SDBG") << //unsigned uSDBG : 1; // bit 11
 			(cpuid.uFMA ? " +FMA" : " -FMA") << //unsigned uFMA : 1; // bit 12
 			(cpuid.uCMPXCHG16B ? " +CMPXCHG16B" : " -CMPXCHG16B") << //unsigned uCMPXCHG16B : 1; // bit 13
-			//unsigned u_xTPR_UpdateControl : 1; // bit 14
+			(cpuid.u_xTPR_UpdateControl ? " +xTPR_UpdateControl" : " -xTPR_UpdateControl") << //unsigned u_xTPR_UpdateControl : 1; // bit 14
 			(cpuid.uPDCM ? " +PDCM" : " -PDCM") << //unsigned uPDCM : 1; // bit 15: Perfmon and Debug Capability
 			//unsigned : 1; // bit 16
-			//unsigned uPCID : 1; // bit 17: Process-context identifiers
-			//unsigned uDCA : 1; // bit 18
+			(cpuid.uPCID ? " +PCID" : " -PCID") << //unsigned uPCID : 1; // bit 17: Process-context identifiers
+			(cpuid.uDCA ? " +DCA" : " -DCA") << //unsigned uDCA : 1; // bit 18
 			(cpuid.uSSE4_1 ? " +SSE4.1" : " -SSE4.1") << //unsigned uSSE4_1 : 1; // bit 19
 			(cpuid.uSSE4_2 ? " +SSE4.2" : " -SSE4.2") << //unsigned uSSE4_2 : 1; // bit 20
 			(cpuid.u_x2APIC ? " +x2APIC" : " -x2APIC") << //unsigned u_x2APIC : 1; // bit 21
@@ -899,6 +899,23 @@ namespace jrmwng
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x17, 2> const & cpuid) { return (os << ' ').write(cpuid.ac, 16); }
 	template <> std::ostream & operator << (std::ostream & os, cpuid_info_t<0x17, 3> const & cpuid) { return (os << ' ').write(cpuid.ac, 16); }
 
+	template <> struct cpuid_info_t<0x40000000>
+	{
+		// eax
+		unsigned uMaxLeaf : 32;
+		// ebx
+		unsigned : 32;
+		// ecx
+		unsigned : 32;
+		// edx
+		unsigned : 32;
+
+		unsigned max_leaf() const
+		{
+			return uMaxLeaf;
+		}
+	};
+
 	template <> struct cpuid_info_t<0x80000000>
 	{
 		// eax
@@ -1058,25 +1075,25 @@ namespace jrmwng
 		os << ' ' << cpuid.uCacheLineSize << 'B';
 		switch (cpuid.emL2Associativity)
 		{
-		case cpuid.L2_DISABLED:
+		case cpuid_info_t<0x80000006>::L2_DISABLED:
 			os << " Disabled";
 			break;
-		case cpuid.L2_DIRECT_MAPPED:
+		case cpuid_info_t<0x80000006>::L2_DIRECT_MAPPED:
 			os << " DirectMapped";
 			break;
-		case cpuid.L2_2WAY:
+		case cpuid_info_t<0x80000006>::L2_2WAY:
 			os << " 2-way";
 			break;
-		case cpuid.L2_4WAY:
+		case cpuid_info_t<0x80000006>::L2_4WAY:
 			os << " 4-way";
 			break;
-		case cpuid.L2_8WAY:
+		case cpuid_info_t<0x80000006>::L2_8WAY:
 			os << " 8-way";
 			break;
-		case cpuid.L2_16WAY:
+		case cpuid_info_t<0x80000006>::L2_16WAY:
 			os << " 16-way";
 			break;
-		case cpuid.L2_FULLY_ASSOCIATIVE:
+		case cpuid_info_t<0x80000006>::L2_FULLY_ASSOCIATIVE:
 			os << " FullyAssociative";
 			break;
 		}
@@ -1374,6 +1391,24 @@ namespace jrmwng
 		}
 	};
 	template <>
+	struct cpuid_tree_t<0x40000000>
+		: cpuid_leaf_t<0x40000000>
+	{
+		cpuid_tree_t()
+		{}
+		cpuid_tree_t(std::istream & is)
+			: cpuid_leaf_t<0x40000000>(is)
+		{}
+		std::ostream & print_tree(std::ostream & os) const
+		{
+			return print_leaf(os);
+		}
+		std::istream & scan_tree(std::istream & is)
+		{
+			return cpuid_leaf_t<0x40000000>::scan_leaf(is);
+		}
+	};
+	template <>
 	struct cpuid_tree_t<0x80000000>
 		: cpuid_leaf_t<0x80000000>
 	{
@@ -1400,5 +1435,45 @@ namespace jrmwng
 	std::istream & operator >> (std::istream & is, cpuid_tree_t<nEAX> & cpuid)
 	{
 		return cpuid.scan_tree(is);
+	}
+
+	struct cpuid_forest_t
+		: cpuid_tree_t<0x17>
+		, cpuid_tree_t<0x400000FF>
+		, cpuid_tree_t<0x8000001B>
+	{
+		typedef cpuid_tree_t<0x17> standard_tree_t;
+		typedef cpuid_tree_t<0x400000FF> hypervisor_tree_t;
+		typedef cpuid_tree_t<0x8000001B> extended_tree_t;
+
+		cpuid_forest_t()
+		{}
+		cpuid_forest_t(std::istream & is)
+			: standard_tree_t(is)
+			, hypervisor_tree_t(is)
+			, extended_tree_t(is)
+		{}
+		std::ostream & print_forest(std::ostream & os) const
+		{
+			standard_tree_t::print_tree(os);
+			hypervisor_tree_t::print_tree(os);
+			extended_tree_t::print_tree(os);
+			return os;
+		}
+		std::istream & scan_forest(std::istream & is)
+		{
+			standard_tree_t::scan_tree(is);
+			hypervisor_tree_t::scan_tree(is);
+			extended_tree_t::scan_tree(is);
+			return is;
+		}
+	};
+	std::ostream & operator << (std::ostream & os, cpuid_forest_t const & cpuid)
+	{
+		return cpuid.print_forest(os);
+	}
+	std::istream & operator >> (std::istream & is, cpuid_forest_t & cpuid)
+	{
+		return cpuid.scan_forest(is);
 	}
 }
