@@ -1290,7 +1290,7 @@ namespace jrmwng
 			}
 			else
 			{
-				_mm_storeu_si128(reinterpret_cast<__m128i*>(this), _mm_setzero_si128());
+				memset(this, 0, sizeof(*this));
 			}
 		}
 		cpuid_t(std::istream & is)
