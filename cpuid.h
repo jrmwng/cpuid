@@ -1064,6 +1064,11 @@ namespace jrmwng
 			L2_4WAY = 4,
 			L2_8WAY = 6,
 			L2_16WAY = 8,
+			L2_32WAY = 0xA,
+			L2_48WAY = 0xB,
+			L2_64WAY = 0xC,
+			L2_96WAY = 0xD,
+			L2_128WAY = 0xE,
 			L2_FULLY_ASSOCIATIVE = 0xF,
 		} emL2Associativity: 4; // [bits 15:12]
 		unsigned uCacheSize1K : 16; // [bits 31:16]
@@ -1219,7 +1224,7 @@ namespace jrmwng
 			char acLocal[2000];
 			do
 			{
-				is.getline(acLocal, std::size(acLocal));
+				is.getline(acLocal, sizeof(acLocal));
 			} while (is.fail() && !is.eof());
 			return is;
 		}
