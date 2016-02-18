@@ -82,7 +82,7 @@ CPUID in C++ template, supporting output and input of cpuid data in human friend
 
 ### How to check features?
 
-      jrmwng::cpuid_tree_t<0x17> CPUID;
+      jrmwng::cpuid_standard_tree_t CPUID;
       
       if (CPUID.uFPU)
       	std::cout << "FPU is available" << std::endl;
