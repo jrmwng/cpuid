@@ -7,65 +7,66 @@
 
 int main()
 {
-	// execution CPUID instructions
+	// execution stCPUID instructions
 
-	jrmwng::cpuid_forest_t CPUID;
+	jrmwng::cpuid_forest_t stCPUID;
+	jrmwng::cpuid_standard_tree_t const & stStandardCPUID = stCPUID;
 
-	// print CPUID data
+	// print stCPUID data
 
-	std::cout << CPUID;
+	std::cout << stCPUID;
 
-	// output CPUID data to the file "cpuid.txt"
+	// output stCPUID data to the file "cpuid.txt"
 
 	std::ofstream ofs("cpuid.txt");
 	{
-		ofs << CPUID;
+		ofs << stCPUID;
 		ofs.close();
 	}
 
 	// zero data structures
 
-	memset(&CPUID, 0, sizeof(CPUID));
+	memset(&stCPUID, 0, sizeof(stCPUID));
 
-	// input CPUID data from the file "cpuid.txt"
+	// input stCPUID data from the file "cpuid.txt"
 
 	std::ifstream ifs("cpuid.txt");
 	{
-		ifs >> CPUID;
+		ifs >> stCPUID;
 		ifs.close();
 	}
 
 	// print features
 
-	if (CPUID.uFPU)
+	if (stStandardCPUID.uFPU)
 		std::cout << "FPU is available" << std::endl;
-	if (CPUID.uMMX)
+	if (stCPUID.uMMX)
 		std::cout << "MMX is available" << std::endl;
 
-	if (CPUID.uSSE && CPUID.uSSE2 && CPUID.uSSE3 && CPUID.uSSSE3 && CPUID.uSSE4_1 && CPUID.uSSE4_2)
+	if (stCPUID.uSSE && stCPUID.uSSE2 && stCPUID.uSSE3 && stCPUID.uSSSE3 && stCPUID.uSSE4_1 && stCPUID.uSSE4_2)
 		std::cout << "SSE is available (all)" << std::endl;
-	else if (CPUID.uSSE || CPUID.uSSE2 || CPUID.uSSE3 || CPUID.uSSSE3 || CPUID.uSSE4_1 || CPUID.uSSE4_2)
+	else if (stCPUID.uSSE || stCPUID.uSSE2 || stCPUID.uSSE3 || stCPUID.uSSSE3 || stCPUID.uSSE4_1 || stCPUID.uSSE4_2)
 		std::cout << "SSE is available (some)" << std::endl;
 
-	if (CPUID.uAVX && CPUID.uAVX2)
+	if (stCPUID.uAVX && stCPUID.uAVX2)
 		std::cout << "AVX is available (all)" << std::endl;
-	else if (CPUID.uAVX || CPUID.uAVX2)
+	else if (stCPUID.uAVX || stCPUID.uAVX2)
 		std::cout << "AVX is available (some)" << std::endl;
 
-	if (CPUID.uBMI1 && CPUID.uBMI2)
+	if (stCPUID.uBMI1 && stCPUID.uBMI2)
 		std::cout << "BMI is available (all)" << std::endl;
-	else if (CPUID.uBMI1 || CPUID.uBMI2)
+	else if (stCPUID.uBMI1 || stCPUID.uBMI2)
 		std::cout << "BMI is available (some)" << std::endl;
 
-	if (CPUID.uHLE)
+	if (stCPUID.uHLE)
 		std::cout << "HLE is available" << std::endl;
-	if (CPUID.uRTM)
+	if (stCPUID.uRTM)
 		std::cout << "RTM is available" << std::endl;
 
-	if (CPUID.uIntelMPX)
+	if (stCPUID.uIntelMPX)
 		std::cout << "Intel MPX is available" << std::endl;
 
-	if (CPUID.uIntelSGX)
+	if (stCPUID.uIntelSGX)
 		std::cout << "Intel SGX is available" << std::endl;
 
 	// print leaf 0x0B
